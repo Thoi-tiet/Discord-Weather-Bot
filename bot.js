@@ -167,7 +167,6 @@ client.on(Events.InteractionCreate, async interaction => {
         fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
         await interaction.editReply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
     }
-
 });
 
 client.on('messageCreate', async message => {
