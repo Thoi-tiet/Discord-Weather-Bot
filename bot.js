@@ -192,6 +192,8 @@ client.on('messageCreate', async message => {
         const lat = args[0];
         const lon = args[1];
         if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+        console.log(`Đang lấy thông tin thời tiết theo tọa độ (${lat}, ${lon})...`);
+
         const result = await fetchWeatherDataByCoords(lat, lon);
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
@@ -219,6 +221,7 @@ client.on('messageCreate', async message => {
         const lon = args[1];
         const hours = args[2] || 3;
         if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+        console.log(`Đang lấy thông tin dự báo thời tiết theo tọa độ (${lat}, ${lon}) trong ${hours} giờ tới...`);
         const result = await fetchForecastByCoords(lat, lon, hours);
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
@@ -243,6 +246,7 @@ client.on('messageCreate', async message => {
 });
 
 async function fetchWeatherData(location) {
+    console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
         const data = await res.json();
@@ -254,6 +258,7 @@ async function fetchWeatherData(location) {
 }
 
 async function fetchWeatherDataByCoords(lat, lon) {
+    console.log(`Đang lấy thông tin thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
         const data = await res.json();
@@ -297,6 +302,7 @@ function buildWeatherEmbed(data) {
 }
 
 async function fetchForecast(location, hours) {
+    console.log(`Đang lấy thông tin dự báo thời tiết cho ${location} trong ${hours} giờ tới...`);
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
         const data = await res.json();
@@ -308,6 +314,7 @@ async function fetchForecast(location, hours) {
 }
 
 async function fetchForecastByCoords(lat, lon, hours) {
+    console.log(`Đang lấy thông tin dự báo thời tiết tại vị trí (${lat}, ${lon}) trong ${hours} giờ tới...`);
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
         const data = await res.json();
@@ -338,7 +345,7 @@ function buildForecastEmbed(data, hours, title) {
     let desc = '';
     selected.forEach(item => {
         const time = new Date(item.dt * 1000).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-        desc += `**${time}** - ${item.weather[0].description}, 🌡 ${item.main.temp}°C, 💧 ${item.main.humidity}%, 👁 ${(item.visibility / 1000).toFixed(1)} km, 💨 ${item.wind.speed} m/s\n`;
+        desc += `**${time} (GMT+0)** - ${item.weather[0].description}, 🌡 ${item.main.temp}°C, 💧 ${item.main.humidity}%, 👁 ${(item.visibility / 1000).toFixed(1)} km, 💨 ${item.wind.speed} m/s\n\n`;
     });
 
     embed.setDescription(desc);
