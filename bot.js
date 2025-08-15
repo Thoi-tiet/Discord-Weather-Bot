@@ -1,7 +1,16 @@
+const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('./keepalive.js');
+
+const default_prefix = "w!";
+let prefixes = {};
+try {
+    prefixes = JSON.parse(fs.readFileSync('./prefixes.json', 'utf8'));
+} catch {
+    prefixes = {};
+}
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -143,6 +152,74 @@ client.on(Events.InteractionCreate, async interaction => {
         });
     }
 
+});
+
+client.on('messageCreate', async message => {
+    if (message.author.bot || message.guild) return;
+    const prefix = prefixes[message.guild.id] || default_prefix;
+    if (!message.content.startsWith(prefix)) return;
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const command = args.shift().toLowerCase();
+    if (command === 'setprefix') {
+        if (!message.member.permissions.has('Administrator')) {
+            return message.reply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+        }
+        const newPrefix = args[0];
+        if (!newPrefix) return message.reply('⚠ Vui lòng cung cấp tiền tố mới.');
+        prefixes[message.guild.id] = newPrefix;
+        fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
+        return message.reply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
+    }
+
+    if (command === 'weather') {
+        const location = args.join(' ');
+        if (!location) return message.reply('⚠ Vui lòng cung cấp địa điểm.');
+        const result = await fetchWeatherData(location);
+        await message.reply(result.error ? result.content : { embeds: [result.embed] });
+    }
+
+    if (command === 'weather_coord') {
+        const lat = args[0];
+        const lon = args[1];
+        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+        const result = await fetchWeatherDataByCoords(lat, lon);
+        await message.reply(result.error ? result.content : { embeds: [result.embed] });
+    }
+
+    if (command === 'forecast') {
+        const location = args.join(' ');
+        const hours = args[1] || 3;
+        if (!location) return message.reply('⚠ Vui lòng cung cấp địa điểm.');
+        const result = await fetchForecast(location, hours);
+        await message.reply(result.error ? result.content : { embeds: [result.embed] });
+    }
+
+    if (command === 'forecast_coord') {
+        const lat = args[0];
+        const lon = args[1];
+        const hours = args[2] || 3;
+        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+        const result = await fetchForecastByCoords(lat, lon, hours);
+        await message.reply(result.error ? result.content : { embeds: [result.embed] });
+    }
+
+    if (command === 'help') {
+        await message.reply({
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle('Trợ giúp')
+                    .setDescription('Danh sách các lệnh:')
+                    .addFields(
+                        { name: `${prefix}weather`, value: 'Xem thời tiết hiện tại', inline: true },
+                        { name: `${prefix}weather_coord`, value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
+                        { name: `${prefix}forecast`, value: 'Xem dự báo thời tiết', inline: true },
+                        { name: `${prefix}forecast_coord`, value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
+                        { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
+                        { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true }
+                    )
+            ]
+        });
+    }
 });
 
 async function fetchWeatherData(location) {
