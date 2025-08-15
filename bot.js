@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField } = require('discord.js');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('./keepalive.js');
@@ -12,7 +12,14 @@ try {
     prefixes = {};
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -163,7 +170,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'setprefix') {
         await interaction.deferReply();
-        if (!interaction.member.permissions.has('Administrator')) {
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return interaction.editReply('🚫 Bạn không có quyền để thay đổi tiền tố.');
         }
         const newPrefix = options.getString('prefix');
@@ -180,7 +187,7 @@ client.on('messageCreate', async message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
     if (command === 'setprefix') {
-        if (!message.member.permissions.has('Administrator')) {
+        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return message.reply('🚫 Bạn không có quyền để thay đổi tiền tố.');
         }
         const newPrefix = args[0];
@@ -218,8 +225,9 @@ client.on('messageCreate', async message => {
     }
 
     if (command === 'forecast') {
-        const location = args.join(' ');
-        const hours = args[1] || 3;
+        let location = args.slice(0, -1).join(' ');
+        const hours = parseInt(args[args.length - 1]) || 3;
+
         if (!location) {
             return message.reply(`⚠ Vui lòng nhập địa điểm. Nếu có khoảng trắng, hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
         }
@@ -227,10 +235,10 @@ client.on('messageCreate', async message => {
         if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
             return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
         }
-        const clean_location = location.trim().replace(/^"(.*)"$/, '$1');
-        console.log(`Đang lấy thông tin thời tiết cho ${clean_location}...`);
-        // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
-        const result = await fetchForecast(clean_location, hours);
+        location = location.replace(/^"(.*)"$/, '$1');
+        console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
+        // await message.reply(`Đang lấy thông tin thời tiết cho **${location}**...`);
+        const result = await fetchForecast(location, hours);
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
 
