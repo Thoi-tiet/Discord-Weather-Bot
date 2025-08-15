@@ -173,8 +173,17 @@ client.on('messageCreate', async message => {
 
     if (command === 'weather') {
         const location = args.join(' ');
-        if (!location) return message.reply('⚠ Vui lòng cung cấp địa điểm.');
-        const result = await fetchWeatherData(location);
+        if (!location) {
+            return message.reply(`⚠ Vui lòng nhập địa điểm. Nếu có khoảng trắng, hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
+        }
+
+        if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
+            return message.reply(`⚠Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
+        }
+
+        const clean_location = location.replace(/^"(.+)"$/, '$1');
+        // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
+        const result = await fetchWeatherData(clean_location);
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
 
@@ -189,8 +198,17 @@ client.on('messageCreate', async message => {
     if (command === 'forecast') {
         const location = args.join(' ');
         const hours = args[1] || 3;
-        if (!location) return message.reply('⚠ Vui lòng cung cấp địa điểm.');
-        const result = await fetchForecast(location, hours);
+        if (!location) {
+            return message.reply(`⚠ Vui lòng nhập địa điểm. Nếu có khoảng trắng, hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
+        }
+
+        if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
+            return message.reply(`⚠Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
+        }
+
+        const clean_location = location.replace(/^"(.+)"$/, '$1');
+        // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
+        const result = await fetchForecast(clean_location, hours);
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
 
