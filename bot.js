@@ -181,7 +181,7 @@ client.on('messageCreate', async message => {
             return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
         }
 
-        const clean_location = location.replace(/^"(.+)"$/, '$1');
+        const clean_location = location.trim().replace(/^"(.*)"$/, '$1');
         console.log(`Đang lấy thông tin thời tiết cho ${clean_location}...`);
         // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
         const result = await fetchWeatherData(clean_location);
@@ -208,8 +208,7 @@ client.on('messageCreate', async message => {
         if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
             return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
         }
-
-        const clean_location = location.replace(/^"(.+)"$/, '$1');
+        const clean_location = location.trim().replace(/^"(.*)"$/, '$1');
         console.log(`Đang lấy thông tin thời tiết cho ${clean_location}...`);
         // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
         const result = await fetchForecast(clean_location, hours);
