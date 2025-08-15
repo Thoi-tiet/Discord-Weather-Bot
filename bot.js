@@ -8,7 +8,8 @@ const default_prefix = "w!";
 let prefixes = {};
 try {
     prefixes = JSON.parse(fs.readFileSync('./prefixes.json', 'utf8'));
-} catch {
+} catch (err) {
+    console.log(`Cannot read prefixes.json, ${err}`);
     prefixes = {};
 }
 
