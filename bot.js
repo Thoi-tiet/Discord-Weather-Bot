@@ -17,7 +17,8 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ]
 });
 
@@ -172,12 +173,17 @@ client.on(Events.InteractionCreate, async interaction => {
     if (commandName === 'setprefix') {
         await interaction.deferReply();
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return interaction.editReply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+            return interaction.editReply({ content: '❌ Bạn cần quyền Quản trị viên để đổi prefix.', ephemeral: true });
         }
         const newPrefix = options.getString('prefix');
-        prefixes[interaction.guild.id] = newPrefix;
-        fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
-        await interaction.editReply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
+        try {
+            prefixes[interaction.guild.id] = newPrefix;
+            fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
+            return interaction.reply(`✅ Prefix đã đổi thành \`${newPrefix}\``);
+        } catch (err) {
+            console.error(err);
+            return interaction.reply({ content: '❌ Không thể lưu prefix. Vui lòng thử lại.', ephemeral: true });
+        }
     }
 });
 
@@ -189,7 +195,7 @@ client.on('messageCreate', async message => {
     const command = args.shift().toLowerCase();
     if (command === 'setprefix') {
         if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return message.reply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+            return message.reply({ content: '❌ Bạn cần quyền Quản trị viên để đổi prefix.', ephemeral: true });
         }
         const newPrefix = args[0];
         if (!newPrefix) return message.reply('⚠ Vui lòng cung cấp tiền tố mới.');
