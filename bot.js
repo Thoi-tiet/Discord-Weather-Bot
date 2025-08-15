@@ -170,7 +170,7 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on('messageCreate', async message => {
-    if (message.author.bot || message.guild) return;
+    if (message.author.bot || !message.guild) return;
     const prefix = prefixes[message.guild.id] || default_prefix;
     if (!message.content.startsWith(prefix)) return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
