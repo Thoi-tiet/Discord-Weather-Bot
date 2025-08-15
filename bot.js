@@ -80,7 +80,7 @@ const commands = [
         .setName('help')
         .setDescription('Hiển thị thông tin trợ giúp'),
     new SlashCommandBuilder()
-        .setName('changeprefix')
+        .setName('setprefix')
         .setDescription('Thay đổi tiền tố')
         .addStringOption(opt =>
             opt.setName('prefix')
@@ -154,14 +154,18 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/weather_coord', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
                         { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                         { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
+                        { name: '/setprefix', value: 'Thay đổi tiền tố', inline: true },
                         { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true }
                     )
             ]
         });
     }
 
-    if (commandName === 'changeprefix') {
+    if (commandName === 'setprefix') {
         await interaction.deferReply();
+        if (!message.member.permissions.has('Administrator')) {
+            await message.editReply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+        }
         const newPrefix = options.getString('prefix');
         prefixes[interaction.guild.id] = newPrefix;
         fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
