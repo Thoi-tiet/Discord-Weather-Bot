@@ -163,8 +163,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'setprefix') {
         await interaction.deferReply();
-        if (!message.member.permissions.has('Administrator')) {
-            await message.editReply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+        if (!interaction.member.permissions.has('Administrator')) {
+            await interaction.editReply('🚫 Bạn không có quyền để thay đổi tiền tố.');
+            return;
         }
         const newPrefix = options.getString('prefix');
         prefixes[interaction.guild.id] = newPrefix;
