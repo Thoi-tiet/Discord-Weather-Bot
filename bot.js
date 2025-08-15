@@ -78,7 +78,15 @@ const commands = [
         ),
     new SlashCommandBuilder()
         .setName('help')
-        .setDescription('Hiển thị thông tin trợ giúp')
+        .setDescription('Hiển thị thông tin trợ giúp'),
+    new SlashCommandBuilder()
+        .setName('changeprefix')
+        .setDescription('Thay đổi tiền tố')
+        .addStringOption(opt =>
+            opt.setName('prefix')
+                .setDescription('Tiền tố mới')
+                .setRequired(true)
+        )
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -150,6 +158,14 @@ client.on(Events.InteractionCreate, async interaction => {
                     )
             ]
         });
+    }
+
+    if (commandName === 'changeprefix') {
+        await interaction.deferReply();
+        const newPrefix = options.getString('prefix');
+        prefixes[interaction.guild.id] = newPrefix;
+        fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
+        await interaction.editReply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
     }
 
 });
