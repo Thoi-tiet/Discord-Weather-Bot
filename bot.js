@@ -96,7 +96,20 @@ const commands = [
             opt.setName('prefix')
                 .setDescription('Tiền tố mới')
                 .setRequired(true)
+        ),
+    new SlashCommandBuilder()
+        .setName('air_pollution')
+        .setDescription('Xem thông tin ô nhiễm không khí')
+        .addStringOption(opt =>
+            opt.setName('lat')
+                .setDescription('Vĩ độ')
+                .setRequired(true)
         )
+        .addStringOption(opt =>
+            opt.setName('lon')
+                .setDescription('Kinh độ')
+                .setRequired(true)
+        ),
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -107,6 +120,10 @@ const rest = new REST({ version: '10' }).setToken(TOKEN);
 
 client.once('ready', () => {
     console.log(`Bot đã đăng nhập: ${client.user.tag}`);
+    client.user.setPresence({
+        activities: [{ name: 'Đang theo dõi thời tiết 🌦', type: 3 }],
+        status: 'online'
+    });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -185,6 +202,14 @@ client.on(Events.InteractionCreate, async interaction => {
             console.error(err);
             return interaction.reply({ content: '❌ Không thể lưu prefix. Vui lòng thử lại.', ephemeral: true });
         }
+    }
+
+    if (commandName === 'air_pollution') {
+        await interaction.deferReply();
+        const lat = options.getNumber('lat');
+        const lon = options.getNumber('lon');
+        const result = await getAirPollutionData(lat, lon);
+        await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
     }
 });
 
@@ -277,6 +302,15 @@ client.on('messageCreate', async message => {
             ]
         });
     }
+
+    if (commandName === 'air_pollution') {
+        const lat = args[0];
+        const lon = args[1];
+        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+        console.log(`Đang lấy thông tin ô nhiễm không khí theo tọa độ (${lat}, ${lon})...`);
+        const result = await getAirPollutionData(lat, lon);
+        await message.reply(result.error ? result.content : { embeds: [result.embed] });
+    }
 });
 
 async function fetchWeatherData(location) {
@@ -301,6 +335,44 @@ async function fetchWeatherDataByCoords(lat, lon) {
     } catch {
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
+}
+
+async function getAirPollutionData(lat, lon) {
+    console.log(`Đang lấy thông tin ô nhiễm không khí cho tọa độ (${lat}, ${lon})...`);
+    try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&lang=vi`);
+        const data = await res.json();
+        if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
+        return { error: false, embed: buildAirPollutionEmbed(data) };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
+    }
+}
+
+// build embed
+function buildAirPollutionEmbed(data) {
+    const aqi = data.list[0].main.aqi;
+    let aqiDescription = '';
+    if (aqi === 1) aqiDescription = 'Tốt';
+    else if (aqi === 2) aqiDescription = 'Trung bình';
+    else if (aqi === 3) aqiDescription = 'Kém';
+    else if (aqi === 4) aqiDescription = 'Xấu';
+    else if (aqi === 5) aqiDescription = 'Rất xấu';
+
+    return new EmbedBuilder()
+        .setTitle(`🌍 Thông tin ô nhiễm không khí ở (${data.coord.lat}, ${data.coord.lon})`)
+        .setDescription(`Chỉ số chất lượng không khí (AQI): ${aqi} - ${aqiDescription}`)
+        .setColor(0x2ecc71)
+        .addFields(
+            { name: '🌫 PM2.5', value: `${data.list[0].components.pm2_5} µg/m³`, inline: true },
+            { name: '🌫 PM10', value: `${data.list[0].components.pm10} µg/m³`, inline: true },
+            { name: '🌫 CO', value: `${data.list[0].components.co} µg/m³`, inline: true },
+            { name: '🌫 NO2', value: `${data.list[0].components.no2} µg/m³`, inline: true },
+            { name: '🌫 O3', value: `${data.list[0].components.o3} µg/m³`, inline: true },
+            { name: '🌫 SO2', value: `${data.list[0].components.so2} µg/m³`, inline: true }
+        )
+        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by @random.person.255' })
+        .setTimestamp();
 }
 
 function buildWeatherEmbed(data) {
