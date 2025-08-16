@@ -100,12 +100,12 @@ const commands = [
     new SlashCommandBuilder()
         .setName('air_pollution')
         .setDescription('Xem thông tin ô nhiễm không khí')
-        .addIntegerOption(opt =>
+        .addNumberOption(opt =>
             opt.setName('latitude')
                 .setDescription('Vĩ độ')
                 .setRequired(true)
         )
-        .addIntegerOption(opt =>
+        .addNumberOption(opt =>
             opt.setName('longitude')
                 .setDescription('Kinh độ')
                 .setRequired(true)
