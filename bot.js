@@ -181,6 +181,7 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/weather_coord', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
                         { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                         { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
+                        { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: '/setprefix', value: 'Thay đổi tiền tố', inline: true },
                         { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true }
                     )
@@ -296,6 +297,7 @@ client.on('messageCreate', async message => {
                         { name: `${prefix}weather_coord`, value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
                         { name: `${prefix}forecast`, value: 'Xem dự báo thời tiết', inline: true },
                         { name: `${prefix}forecast_coord`, value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
+                        { name: `${prefix}air_pollution`, value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
                         { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true }
                     )
