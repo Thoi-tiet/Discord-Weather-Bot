@@ -207,11 +207,23 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'air_pollution') {
         await interaction.deferReply();
+
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
-        const result = await getAirPollutionData(lat, lon);
-        await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+
+        try {
+            const result = await getAirPollutionData(lat, lon);
+            if (result.error) {
+                await interaction.editReply(result.content);
+            } else {
+                await interaction.editReply({ embeds: [result.embed] });
+            }
+        } catch (err) {
+            console.error(err);
+            await interaction.editReply('❌ Lỗi khi lấy dữ liệu chất lượng không khí.');
+        }
     }
+
 });
 
 client.on('messageCreate', async message => {
