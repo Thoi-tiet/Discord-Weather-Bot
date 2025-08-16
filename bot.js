@@ -356,7 +356,7 @@ async function getAirPollutionData(lat, lon) {
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&lang=vi`);
         const data = await res.json();
-        if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
+        //if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
         return { error: false, embed: buildAirPollutionEmbed(data) };
     } catch {
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
