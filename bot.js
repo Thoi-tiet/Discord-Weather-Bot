@@ -100,13 +100,13 @@ const commands = [
     new SlashCommandBuilder()
         .setName('air_pollution')
         .setDescription('Xem thông tin ô nhiễm không khí')
-        .addStringOption(opt =>
-            opt.setName('lat')
+        .addIntegerOption(opt =>
+            opt.setName('latitude')
                 .setDescription('Vĩ độ')
                 .setRequired(true)
         )
-        .addStringOption(opt =>
-            opt.setName('lon')
+        .addIntegerOption(opt =>
+            opt.setName('longitude')
                 .setDescription('Kinh độ')
                 .setRequired(true)
         ),
@@ -207,8 +207,8 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'air_pollution') {
         await interaction.deferReply();
-        const lat = options.getNumber('lat');
-        const lon = options.getNumber('lon');
+        const lat = options.getNumber('latitude');
+        const lon = options.getNumber('longitude');
         const result = await getAirPollutionData(lat, lon);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
     }
