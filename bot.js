@@ -201,10 +201,10 @@ client.on(Events.InteractionCreate, async interaction => {
         try {
             prefixes[interaction.guildId] = newPrefix;
             fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
-            return interaction.reply(`✅ Prefix đã đổi thành \`${newPrefix}\``);
+            return interaction.editReply(`✅ Prefix đã đổi thành \`${newPrefix}\``);
         } catch (err) {
             console.error(err);
-            return interaction.reply({ content: '❌ Không thể lưu prefix. Vui lòng thử lại.', ephemeral: true });
+            return interaction.editReply({ content: '❌ Không thể lưu prefix. Vui lòng thử lại.', ephemeral: true });
         }
     }
 
