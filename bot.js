@@ -110,6 +110,29 @@ const commands = [
                 .setDescription('Kinh độ')
                 .setRequired(true)
         ),
+    new SlashCommandBuilder()
+        .setName("geo")
+        .setDescription("Chuyển đổi giữa địa điểm và tọa độ")
+        .addSubcommand(sub =>
+            sub
+                .setName("location")
+                .setDescription("Chuyển từ địa điểm sang tọa độ")
+                .addStringOption(option =>
+                    option.setName("dia_diem").setDescription("Nhập tên địa điểm").setRequired(true)
+                )
+        )
+        .addSubcommand(sub =>
+            sub
+                .setName("coords")
+                .setDescription("Chuyển từ tọa độ sang địa điểm")
+                .addNumberOption(option =>
+                    option.setName("lat").setDescription("Nhập vĩ độ").setRequired(true)
+                )
+                .addNumberOption(option =>
+                    option.setName("lon").setDescription("Nhập kinh độ").setRequired(true)
+                )
+        )
+        .toJSON(),
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -227,6 +250,53 @@ client.on(Events.InteractionCreate, async interaction => {
         }
     }
 
+    if (commandName === 'geo') {
+        const sub = interaction.options.getSubcommand();
+
+        // 1️⃣ Địa điểm → Tọa độ
+        if (sub === "location") {
+            const query = interaction.options.getString("dia_diem");
+
+            await interaction.deferReply();
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.length) return interaction.editReply("⚠️ Không tìm thấy địa điểm nào.");
+
+                const place = data[0];
+                await interaction.editReply(`📍 **${place.display_name}**  
+🌐 Vĩ độ (latitude): \`${place.lat}\`  
+🌐 Kinh độ (longitude): \`${place.lon}\``);
+            } catch (err) {
+                console.error(err);
+                await interaction.editReply("❌ Có lỗi xảy ra khi tìm tọa độ.");
+            }
+        }
+
+        // 2️⃣ Tọa độ → Địa điểm
+        else if (sub === "coords") {
+            const lat = interaction.options.getNumber("lat");
+            const lon = interaction.options.getNumber("lon");
+
+            await interaction.deferReply();
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.display_name) return interaction.editReply("⚠️ Không tìm thấy địa điểm nào.");
+
+                await interaction.editReply(`📍 Tọa độ: \`${lat}, ${lon}\`  
+🗺️ Địa điểm: **${data.display_name}**`);
+            } catch (err) {
+                console.error(err);
+                await interaction.editReply("❌ Có lỗi xảy ra khi tìm địa điểm.");
+            }
+        }
+    }
+
 });
 
 client.on('messageCreate', async message => {
@@ -320,7 +390,7 @@ client.on('messageCreate', async message => {
         });
     }
 
-    if (commandName === 'air_pollution') {
+    if (command === 'air_pollution') {
         const lat = args[0];
         const lon = args[1];
         if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
