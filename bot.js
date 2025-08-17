@@ -191,6 +191,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'setprefix') {
         await interaction.deferReply();
+        if (!interaction.guild || !interaction.guildId) {
+            return interaction.editReply({ content: '❌ Lệnh này chỉ có thể được sử dụng trong máy chủ.', ephemeral: true });
+        }
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return interaction.editReply({ content: '❌ Bạn cần quyền Quản trị viên để đổi prefix.', ephemeral: true });
         }
