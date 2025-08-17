@@ -204,6 +204,8 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                         { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
                         { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
+                        { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
+                        { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
                         { name: '/setprefix', value: 'Thay đổi tiền tố', inline: true },
                         { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true }
                     )
