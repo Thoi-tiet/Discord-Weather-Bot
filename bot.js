@@ -115,15 +115,15 @@ const commands = [
         .setDescription("Chuyển đổi giữa địa điểm và tọa độ")
         .addSubcommand(sub =>
             sub
-                .setName("location")
+                .setName("location_to_coords")
                 .setDescription("Chuyển từ địa điểm sang tọa độ")
                 .addStringOption(option =>
-                    option.setName("dia_diem").setDescription("Nhập tên địa điểm").setRequired(true)
+                    option.setName("location").setDescription("Nhập tên địa điểm").setRequired(true)
                 )
         )
         .addSubcommand(sub =>
             sub
-                .setName("coords")
+                .setName("coords_to_location")
                 .setDescription("Chuyển từ tọa độ sang địa điểm")
                 .addNumberOption(option =>
                     option.setName("lat").setDescription("Nhập vĩ độ").setRequired(true)
@@ -253,8 +253,8 @@ client.on(Events.InteractionCreate, async interaction => {
         const sub = interaction.options.getSubcommand();
 
         // 1️⃣ Địa điểm → Tọa độ
-        if (sub === "location") {
-            const query = interaction.options.getString("dia_diem");
+        if (sub === "location_to_coords") {
+            const query = interaction.options.getString("location");
 
             await interaction.deferReply();
             try {
@@ -275,7 +275,7 @@ client.on(Events.InteractionCreate, async interaction => {
         }
 
         // 2️⃣ Tọa độ → Địa điểm
-        else if (sub === "coords") {
+        else if (sub === "coords_to_location") {
             const lat = interaction.options.getNumber("lat");
             const lon = interaction.options.getNumber("lon");
 
