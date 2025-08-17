@@ -199,7 +199,7 @@ client.on(Events.InteractionCreate, async interaction => {
         }
         const newPrefix = options.getString('prefix');
         try {
-            prefixes[interaction.guild.id] = newPrefix;
+            prefixes[interaction.guildId] = newPrefix;
             fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
             return interaction.reply(`✅ Prefix đã đổi thành \`${newPrefix}\``);
         } catch (err) {
