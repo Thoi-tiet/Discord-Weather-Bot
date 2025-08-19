@@ -194,7 +194,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'donate') {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply(/*{ ephemeral: true }*/);
 
     const donateEmbed = new EmbedBuilder()
         .setColor(0xffcc70)
