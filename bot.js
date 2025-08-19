@@ -131,7 +131,10 @@ const commands = [
                 .addNumberOption(option =>
                     option.setName("lon").setDescription("Nhập kinh độ").setRequired(true)
                 )
-        )
+        ),
+    new SlashCommandBuilder()
+        .setName('donate')
+        .setDescription('Ủng hộ để phát triển bot')
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -189,6 +192,23 @@ client.on(Events.InteractionCreate, async interaction => {
         const result = await fetchForecastByCoords(lat, lon, hours);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
     }
+
+    if (commandName === 'donate') {
+    await interaction.deferReply({ ephemeral: true });
+
+    const donateEmbed = new EmbedBuilder()
+        .setColor(0xffcc70)
+        .setTitle('☕ Ủng hộ Weather#6014')
+        .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
+        .addFields(
+            { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
+            { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
+        )
+        .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+
+    await interaction.editReply({ embeds: [donateEmbed] });
+    }
+
     // Thêm trợ giúp
 
     if (commandName === 'help') {
@@ -207,7 +227,8 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
                         { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
                         { name: '/setprefix', value: 'Thay đổi tiền tố', inline: true },
-                        { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true }
+                        { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true },
+                        { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true }
                     )
             ]
         });
@@ -317,6 +338,21 @@ client.on('messageCreate', async message => {
         return message.reply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
     }
 
+    if (command === 'donate') {
+
+    const donateEmbed = new EmbedBuilder()
+        .setColor(0xffcc70)
+        .setTitle('☕ Ủng hộ Weather#6014')
+        .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
+        .addFields(
+            { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
+            { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
+        )
+        .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+
+    await message.reply({ embeds: [donateEmbed] });
+    }
+
     if (command === 'weather') {
         const location = args.join(' ');
         if (!location) {
@@ -385,7 +421,8 @@ client.on('messageCreate', async message => {
                         { name: `${prefix}forecast_coord`, value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
                         { name: `${prefix}air_pollution`, value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
-                        { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true }
+                        { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true },
+                        { name: `${prefix}donate`, value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true }
                     )
             ]
         });
