@@ -194,19 +194,19 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'donate') {
-    await interaction.deferReply(/*{ ephemeral: true }*/);
+        await interaction.deferReply(/*{ ephemeral: true }*/);
 
-    const donateEmbed = new EmbedBuilder()
-        .setColor(0xffcc70)
-        .setTitle('☕ Ủng hộ Weather#6014')
-        .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
-        .addFields(
-            { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
-            { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
-        )
-        .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+        const donateEmbed = new EmbedBuilder()
+            .setColor(0xffcc70)
+            .setTitle('☕ Ủng hộ Weather#6014')
+            .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
+            .addFields(
+                { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
+                { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
+            )
+            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
 
-    await interaction.editReply({ embeds: [donateEmbed] });
+        await interaction.editReply({ embeds: [donateEmbed] });
     }
 
     // Thêm trợ giúp
@@ -282,7 +282,12 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.deferReply();
             try {
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
-                const res = await fetch(url);
+                const res = await fetch(url, {
+                    headers: {
+                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
+                    },
+                    timeout: 10000
+                });
                 const data = await res.json();
 
                 if (!data.length) return interaction.editReply("⚠️ Không tìm thấy địa điểm nào.");
@@ -305,7 +310,12 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.deferReply();
             try {
                 const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
-                const res = await fetch(url);
+                const res = await fetch(url, {
+                    headers: {
+                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
+                    },
+                    timeout: 10000
+                });
                 const data = await res.json();
 
                 if (!data.display_name) return interaction.editReply("⚠️ Không tìm thấy địa điểm nào.");
@@ -340,17 +350,17 @@ client.on('messageCreate', async message => {
 
     if (command === 'donate') {
 
-    const donateEmbed = new EmbedBuilder()
-        .setColor(0xffcc70)
-        .setTitle('☕ Ủng hộ Weather#6014')
-        .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
-        .addFields(
-            { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
-            { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
-        )
-        .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+        const donateEmbed = new EmbedBuilder()
+            .setColor(0xffcc70)
+            .setTitle('☕ Ủng hộ Weather#6014')
+            .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
+            .addFields(
+                { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
+                { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
+            )
+            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
 
-    await message.reply({ embeds: [donateEmbed] });
+        await message.reply({ embeds: [donateEmbed] });
     }
 
     if (command === 'weather') {
