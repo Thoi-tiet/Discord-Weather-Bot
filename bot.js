@@ -408,6 +408,63 @@ client.on('messageCreate', async message => {
         await message.reply(result.error ? result.content : { embeds: [result.embed] });
     }
 
+    if (command === 'geo') {
+        // subcommand
+        const subcommand = args[0];
+        if (subcommand === 'ctl' || subcommand === 'coords_to_location') {
+            const lat = args[1];
+            const lon = args[2];
+            if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
+            console.log(`Đang lấy thông tin địa lý cho tọa độ (${lat}, ${lon})...`);
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+                const res = await fetch(url, {
+                    headers: {
+                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
+                    },
+                    timeout: 10000
+                });
+                const data = await res.json();
+
+                if (!data.display_name) return message.reply("⚠️ Không tìm thấy địa điểm nào.");
+
+                await message.reply(`📍 Tọa độ: \`${lat}, ${lon}\`  
+🗺️ Địa điểm: **${data.display_name}**`);
+            } catch (err) {
+                console.error(err);
+                await message.reply("❌ Có lỗi xảy ra khi tìm địa điểm.");
+            }
+        } else if (subcommand === 'ltc' || subcommand === 'location_to_coords') {
+            // location phải để trong ngoặc kép
+            let location = args.slice(0, -1).join(' ');
+            if (!location.startsWith('"') || !location.endsWith('"')) {
+                return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}geo ltc "Ho Chi Minh"\``);
+            }
+            location = location.replace(/^"(.*)"$/, '$1');
+            console.log(`Đang lấy thông tin địa lý cho địa điểm ${location}...`);
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+                const res = await fetch(url, {
+                    headers: {
+                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
+                    },
+                    timeout: 10000
+                });
+                const data = await res.json();
+
+                if (!data.length) return message.reply("⚠️ Không tìm thấy địa điểm nào.");
+
+                const place = data[0];
+                await message.reply(`📍 **${place.display_name}**  
+🌐 Vĩ độ (latitude): \`${place.lat}\`  
+🌐 Kinh độ (longitude): \`${place.lon}\``);
+            } catch (err) {
+                console.error(err);
+                await message.reply("❌ Có lỗi xảy ra khi tìm tọa độ.");
+            }
+        }
+    }
+
     if (command === 'forecast_coord') {
         const lat = args[0];
         const lon = args[1];
