@@ -489,7 +489,9 @@ client.on('messageCreate', async message => {
                         { name: `${prefix}air_pollution`, value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
                         { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true },
-                        { name: `${prefix}donate`, value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true }
+                        { name: `${prefix}donate`, value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
+                        { name: `${prefix}geo ltc (hoặc location_to_coords)`, value: 'Chuyển đổi từ địa điểm sang tọa độ', inline: true },
+                        { name: `${prefix}geo ctl (hoặc coords_to_location)`, value: 'Chuyển đổi từ tọa độ sang địa điểm', inline: true }
                     )
             ]
         });
