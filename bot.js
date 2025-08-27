@@ -443,7 +443,7 @@ client.on('messageCreate', async message => {
             location = location.replace(/^"(.*)"$/, '$1');
             console.log(`Đang lấy thông tin địa lý cho địa điểm ${location}...`);
             try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
                 const res = await fetch(url, {
                     headers: {
                         "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
