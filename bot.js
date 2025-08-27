@@ -436,7 +436,7 @@ client.on('messageCreate', async message => {
             }
         } else if (subcommand === 'ltc' || subcommand === 'location_to_coords') {
             // location phải để trong ngoặc kép
-            let location = args.slice(0, -1).join(' ');
+            let location = args[1].slice(0, -1).join(' ');
             if (!location.startsWith('"') || !location.endsWith('"')) {
                 return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}geo ltc "Ho Chi Minh"\``);
             }
