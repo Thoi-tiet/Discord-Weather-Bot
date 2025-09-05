@@ -146,8 +146,9 @@ const rest = new REST({ version: '10' }).setToken(TOKEN);
 client.once('ready', () => {
     console.log(`Bot đã đăng nhập: ${client.user.tag}`);
     client.user.setPresence({
-        activities: [{ name: 'Đang theo dõi thời tiết 🌦', type: 3 }],
-        status: 'online'
+        activities: [{ name: 'Đang theo dõi thời tiết 🌦', type: 3 }, { name: 'Đang nghe câu lệnh của bạn (/help) ☀', type: 2 }],
+        status: 'online',
+        afk: false
     });
 });
 
