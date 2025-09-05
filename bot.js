@@ -411,7 +411,10 @@ client.on('messageCreate', async message => {
     if (command === 'geo') {
         // subcommand
         const subcommand = args[0];
-        if (subcommand === 'ctl' || subcommand === 'coords_to_location') {
+        if (
+            subcommand === 'ctl' || subcommand === 'coords_to_location' || subcommand === 'coord_to_location' ||
+            subcommand === 'coord_location' || subcommand === 'c_t_l' || subcommand === 'loc_to_coord'
+        ) {
             const lat = args[1];
             const lon = args[2];
             if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
@@ -434,7 +437,10 @@ client.on('messageCreate', async message => {
                 console.error(err);
                 await message.reply("❌ Có lỗi xảy ra khi tìm địa điểm.");
             }
-        } else if (subcommand === 'ltc' || subcommand === 'location_to_coords') {
+        } else if (
+            subcommand === 'ltc' || subcommand === 'location_to_coords' || subcommand === 'location_to_coord' ||
+            subcommand === 'l_t_c' || subcommand === 'loc_to_coord' || subcommand === 'location_coord'
+        ) {
             // location phải để trong ngoặc kép
             let location = message.content.slice((prefix + command + ' ' + subcommand).length).trim();
             if (!location.startsWith('"') || !location.endsWith('"')) {
