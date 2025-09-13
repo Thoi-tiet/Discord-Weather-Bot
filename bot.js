@@ -134,7 +134,22 @@ const commands = [
         ),
     new SlashCommandBuilder()
         .setName('donate')
-        .setDescription('Ủng hộ để phát triển bot')
+        .setDescription('Ủng hộ để phát triển bot'),
+    new SlashCommandBuilder()
+        .setName('weather_icon')
+        .setDescription('Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)')
+        .addStringOption(option =>
+            option.setName('location').setDescription('Tên địa điểm').setRequired(true)
+        ),
+    new SlashCommandBuilder()
+        .setName('weather_icon_coord')
+        .setDescription('Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)')
+        .addNumberOption(option =>
+            option.setName('latitude').setDescription('Vĩ độ').setRequired(true)
+        )
+        .addNumberOption(option =>
+            option.setName('longitude').setDescription('Kinh độ').setRequired(true)
+        ),
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -158,6 +173,27 @@ client.once('ready', () => {
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
+
+    if (commandName === 'weather_icon') {
+        await interaction.deferReply();
+        const location = options.getString('location').trim();
+        const iconResult = await getWeatherIcon(location);
+        if (iconResult.error) {
+            return interaction.editReply(iconResult.content);
+        }
+        await interaction.editReply({ files: [iconResult.iconUrl] });
+    }
+
+    if (commandName === 'weather_icon_coord') {
+        await interaction.deferReply();
+        const lat = options.getNumber('latitude');
+        const lon = options.getNumber('longitude');
+        const iconResult = await getWeatherIconByCoords(lat, lon);
+        if (iconResult.error) {
+            return interaction.editReply(iconResult.content);
+        }
+        await interaction.editReply({ files: [iconResult.iconUrl] });
+    }
 
     if (commandName === 'weather') {
         await interaction.deferReply();
@@ -227,6 +263,8 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/weather_coord', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
                         { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                         { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
+                        { name: '/weather_icon', value: 'Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)', inline: true },
+                        { name: '/weather_icon_coord', value: 'Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)', inline: true },
                         { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
                         { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
@@ -524,6 +562,32 @@ async function fetchWeatherData(location) {
         const data = await res.json();
         if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
         return { error: false, embed: buildWeatherEmbed(data) };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
+    }
+}
+
+async function getWeatherIcon(location) {
+    console.log(`Đang lấy biểu tượng thời tiết cho ${location}...`);
+    try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const data = await res.json();
+        if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
+        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        return { error: false, iconUrl };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
+    }
+}
+
+async function getWeatherIconByCoords(lon, lat) {
+    console.log(`Đang lấy biểu tượng thời tiết cho tọa độ (${lat}, ${lon})...`);
+    try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const data = await res.json();
+        if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
+        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        return { error: false, iconUrl };
     } catch {
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
