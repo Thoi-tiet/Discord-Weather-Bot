@@ -1,0 +1,5 @@
+/weather bot web
+/node_modules
+/DiscordWeatherBot
+.env
+package-lock.json
