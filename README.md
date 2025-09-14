@@ -1,1 +1,1 @@
-# DiscordWeatherBot
+# Discord-Weather-Bot
