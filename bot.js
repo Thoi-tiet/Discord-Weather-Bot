@@ -235,7 +235,7 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
     }
 
-    if (commandName === 'IP') {
+    if (commandName === 'ip') {
         const sub = interaction.options.getSubcommand();
         if (sub === "info") {
             await interaction.deferReply();
@@ -343,7 +343,7 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
                         { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
                         { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
-                        { name: '/IP info', value: 'Xem thông tin địa chỉ IP', inline: true },
+                        { name: '/ip info', value: 'Xem thông tin địa chỉ IP', inline: true },
                     )
             ]
         });
