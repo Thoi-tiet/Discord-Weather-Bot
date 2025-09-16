@@ -157,7 +157,6 @@ client.once('ready', () => {
     client.user.setPresence({
         activities: [
             { name: 'Đang theo dõi thời tiết 🌦', type: 3 },
-            { name: 'Đang nghe câu lệnh của bạn (/help) ☀', type: 2 }
         ],
         status: 'online',
         afk: false
@@ -269,6 +268,7 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                         { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
                         { name: '/weather_icon', value: 'Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)', inline: true },
+                        { name: '/satellite_radiation', value: 'Xem dữ liệu bức xạ vệ tinh (satellite radiation)', inline: true },
                         { name: '/weather_icon_coord', value: 'Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)', inline: true },
                         { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
@@ -465,8 +465,8 @@ function buildSatelliteRadiationEmbed(data) {
         .setTitle(`☀ Dữ liệu bức xạ vệ tinh ở (${data.latitude}, ${data.longitude})`)
         .setColor(0xffcc70)
         .addFields(
-            { name: '🌅 Bình minh (sunrise)', value: `${data.daily.sunrise[todayIndex]}`, inline: true },
-            { name: '🌇 Hoàng hôn (sunset)', value: `${data.daily.sunset[todayIndex]}`, inline: true },
+            { name: '🌅 Bình minh (sunrise) (GMT+0)', value: `${data.daily.sunrise[todayIndex]}`, inline: true },
+            { name: '🌇 Hoàng hôn (sunset) (GMT+0)', value: `${data.daily.sunset[todayIndex]}`, inline: true },
             { name: '⏳ Thời gian ban ngày (daylight duration)', value: `${data.daily.daylight_duration[todayIndex] != null ? data.daily.daylight_duration[todayIndex] : 0} giây`, inline: true },
             { name: '☀ Thời gian có nắng (sunshine duration)', value: `${data.daily.sunshine_duration[todayIndex] != null ? data.daily.sunshine_duration[todayIndex] : 0} giây`, inline: true },
             { name: '🌞 Tổng bức xạ sóng ngắn (shortwave radiation sum)', value: `${data.daily.shortwave_radiation_sum[todayIndex] != null ? data.daily.shortwave_radiation_sum[todayIndex] : 0} MJ/m²`, inline: true }
