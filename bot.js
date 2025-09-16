@@ -163,7 +163,7 @@ const commands = [
             option.setName('longitude').setDescription('Kinh độ').setRequired(true)
         ),
     new SlashCommandBuilder()
-        .setName("IP")
+        .setName("ip")
         .setDescription("Xem thông tin địa chỉ IP")
         .addSubcommand(sub =>
             sub
