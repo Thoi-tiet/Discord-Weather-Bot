@@ -162,6 +162,16 @@ const commands = [
         .addNumberOption(option =>
             option.setName('longitude').setDescription('Kinh độ').setRequired(true)
         ),
+    new SlashCommandBuilder()
+        .setName("IP")
+        .setDescription("Xem thông tin địa chỉ IP")
+        .addSubcommand(sub =>
+            sub.setName("info")
+                .setDescription("Xem thông tin địa chỉ IP")
+                .addStringOption(option =>
+                    option.setName('IP_address').setDescription('Địa chỉ IP').setRequired(true)
+                )
+        ),
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -222,6 +232,24 @@ client.on(Events.InteractionCreate, async interaction => {
         const location = options.getString('location').trim();
         const result = await fetchWeatherData(location);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+    }
+
+    if (commandName === 'IP') {
+        const sub = interaction.options.getSubcommand();
+        if (sub === "info") {
+            await interaction.deferReply();
+            const ip = options.getString('IP_address').trim();
+            try {
+                const res = await fetch("https://api.country.is/" + ip);
+                const data = res.json();
+                if (data.error) {
+                    return interaction.editReply("⚠ Địa chỉ IP không hợp lệ.");
+                }
+                await interaction.editReply("Địa chỉ IP: " + ip + "\nQuốc gia: " + data.country + "\nMã quốc gia: " + data.country_code + "\nThành phố: " + data.city + "\nNhà cung cấp dịch vụ Internet (ISP): " + data.isp);
+            } catch {
+                return interaction.editReply("❌ Lỗi khi lấy thông tin địa chỉ IP.");
+            }
+        }
     }
 
     if (commandName === 'weather_coord') {
