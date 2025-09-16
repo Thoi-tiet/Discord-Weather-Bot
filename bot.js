@@ -170,7 +170,7 @@ const commands = [
                 .setName("info")
                 .setDescription("Xem thông tin địa chỉ IP")
                 .addStringOption(option =>
-                    option.setName('IP_address').setDescription('Địa chỉ IP').setRequired(true)
+                    option.setName('address').setDescription('Địa chỉ IP').setRequired(true)
                 )
         ),
 ].map(cmd => cmd.toJSON());
@@ -239,7 +239,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const sub = interaction.options.getSubcommand();
         if (sub === "info") {
             await interaction.deferReply();
-            const ip = options.getString('IP_address').trim();
+            const ip = options.getString('address').trim();
             try {
                 const res = await fetch("https://api.country.is/" + ip);
                 const data = res.json();
