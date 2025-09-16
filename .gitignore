@@ -1,5 +1,6 @@
 /weather bot web
 /node_modules
 /DiscordWeatherBot
+custom_prefix.js
 .env
 package-lock.json

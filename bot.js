@@ -135,6 +135,15 @@ const commands = [
         .addNumberOption(option =>
             option.setName('longitude').setDescription('Kinh độ').setRequired(true)
         ),
+    new SlashCommandBuilder()
+        .setName('satellite_radiation')
+        .setDescription('Xem dữ liệu bức xạ vệ tinh (satellite radiation)')
+        .addNumberOption(option =>
+            option.setName('latitude').setDescription('Vĩ độ').setRequired(true)
+        )
+        .addNumberOption(option =>
+            option.setName('longitude').setDescription('Kinh độ').setRequired(true)
+        ),
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -178,6 +187,17 @@ client.on(Events.InteractionCreate, async interaction => {
             return interaction.editReply(iconResult.content);
         }
         await interaction.editReply({ files: [iconResult.iconUrl] });
+    }
+
+    if (commandName === 'satellite_radiation') {
+        await interaction.deferReply();
+        const lat = options.getNumber('latitude');
+        const lon = options.getNumber('longitude');
+        const res = await getSatelliteRadiation(lat, lon);
+        if (res.error) {
+            return interaction.editReply(res.content);
+        }
+        await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
     }
 
     if (commandName === 'weather') {
@@ -337,178 +357,17 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
-
-client.on('messageCreate', async message => {
-    if (message.author.bot || !message.guild) return;
-    const prefix = default_prefix;
-    if (!message.content.startsWith(prefix)) return;
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    if (command === 'donate') {
-
-        const donateEmbed = new EmbedBuilder()
-            .setColor(0xffcc70)
-            .setTitle('☕ Ủng hộ Weather#6014')
-            .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
-            .addFields(
-                { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
-                { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
-            )
-            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
-
-        await message.reply({ embeds: [donateEmbed] });
+async function getSatelliteRadiation(lat, lon) {
+    console.log(`Đang lấy thông tin bức xạ vệ tinh cho tọa độ (${lat}, ${lon})...`);
+    try {
+        const res = await fetch(`https://satellite-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset,daylight_duration,sunshine_duration,shortwave_radiation_sum&models=satellite_radiation_seamless`)
+        const data = await res.json();
+        if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu bức xạ vệ tinh cho tọa độ (${lat}, ${lon})` };
+        return { error: false, embed: buildSatelliteRadiationEmbed(data) };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối Satellite API.' };
     }
-
-    if (command === 'weather') {
-        const location = args.join(' ');
-        if (!location) {
-            return message.reply(`⚠ Vui lòng nhập địa điểm. Nếu có khoảng trắng, hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
-        }
-
-        if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
-            return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
-        }
-
-        const clean_location = location.trim().replace(/^"(.*)"$/, '$1');
-        console.log(`Đang lấy thông tin thời tiết cho ${clean_location}...`);
-        // await message.reply(`Đang lấy thông tin thời tiết cho **${clean_location}**...`);
-        const result = await fetchWeatherData(clean_location);
-        await message.reply(result.error ? result.content : { embeds: [result.embed] });
-    }
-
-    if (command === 'weather_coord') {
-        const lat = args[0];
-        const lon = args[1];
-        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
-        console.log(`Đang lấy thông tin thời tiết theo tọa độ (${lat}, ${lon})...`);
-
-        const result = await fetchWeatherDataByCoords(lat, lon);
-        await message.reply(result.error ? result.content : { embeds: [result.embed] });
-    }
-
-    if (command === 'forecast') {
-        let location = args.slice(0, -1).join(' ');
-        const hours = parseInt(args[args.length - 1]) || 3;
-
-        if (!location) {
-            return message.reply(`⚠ Vui lòng nhập địa điểm. Nếu có khoảng trắng, hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
-        }
-
-        if (location.includes(' ') && !(location.startsWith('"') && location.endsWith('"'))) {
-            return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}weather "Ho Chi Minh"\``);
-        }
-        location = location.replace(/^"(.*)"$/, '$1');
-        console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
-        // await message.reply(`Đang lấy thông tin thời tiết cho **${location}**...`);
-        const result = await fetchForecast(location, hours);
-        await message.reply(result.error ? result.content : { embeds: [result.embed] });
-    }
-
-    if (command === 'geo') {
-        // subcommand
-        const subcommand = args[0];
-        if (
-            subcommand === 'ctl' || subcommand === 'coords_to_location' || subcommand === 'coord_to_location' ||
-            subcommand === 'coord_location' || subcommand === 'c_t_l' || subcommand === 'loc_to_coord'
-        ) {
-            const lat = args[1];
-            const lon = args[2];
-            if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
-            console.log(`Đang lấy thông tin địa lý cho tọa độ (${lat}, ${lon})...`);
-            try {
-                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
-                const res = await fetch(url, {
-                    headers: {
-                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
-                    },
-                    timeout: 10000
-                });
-                const data = await res.json();
-
-                if (!data.display_name) return message.reply("⚠️ Không tìm thấy địa điểm nào.");
-
-                await message.reply(`📍 Tọa độ: \`${lat}, ${lon}\`  
-🗺️ Địa điểm: **${data.display_name}**`);
-            } catch (err) {
-                console.error(err);
-                await message.reply("❌ Có lỗi xảy ra khi tìm địa điểm.");
-            }
-        } else if (
-            subcommand === 'ltc' || subcommand === 'location_to_coords' || subcommand === 'location_to_coord' ||
-            subcommand === 'l_t_c' || subcommand === 'loc_to_coord' || subcommand === 'location_coord'
-        ) {
-            // location phải để trong ngoặc kép
-            let location = message.content.slice((prefix + command + ' ' + subcommand).length).trim();
-            if (!location.startsWith('"') || !location.endsWith('"')) {
-                return message.reply(`⚠ Địa điểm có khoảng trắng. Hãy đặt trong dấu ngoặc kép.\nVD: \`${prefix}geo ltc "Ho Chi Minh"\``);
-            }
-            location = location.replace(/^"(.*)"$/, '$1');
-            console.log(`Đang lấy thông tin địa lý cho địa điểm ${location}...`);
-            try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
-                const res = await fetch(url, {
-                    headers: {
-                        "User-Agent": "WeatherBot/1.0 (minhnhanbuinguyen@gmail.com)"
-                    },
-                    timeout: 10000
-                });
-                const data = await res.json();
-
-                if (!data.length) return message.reply("⚠️ Không tìm thấy địa điểm nào.");
-
-                const place = data[0];
-                await message.reply(`📍 **${place.display_name}**  
-🌐 Vĩ độ (latitude): \`${place.lat}\`  
-🌐 Kinh độ (longitude): \`${place.lon}\``);
-            } catch (err) {
-                console.error(err);
-                await message.reply("❌ Có lỗi xảy ra khi tìm tọa độ.");
-            }
-        }
-    }
-
-    if (command === 'forecast_coord') {
-        const lat = args[0];
-        const lon = args[1];
-        const hours = args[2] || 3;
-        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
-        console.log(`Đang lấy thông tin dự báo thời tiết theo tọa độ (${lat}, ${lon}) trong ${hours} giờ tới...`);
-        const result = await fetchForecastByCoords(lat, lon, hours);
-        await message.reply(result.error ? result.content : { embeds: [result.embed] });
-    }
-
-    if (command === 'help') {
-        await message.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle('Trợ giúp')
-                    .setDescription('Danh sách các lệnh:')
-                    .addFields(
-                        { name: `${prefix}weather`, value: 'Xem thời tiết hiện tại', inline: true },
-                        { name: `${prefix}weather_coord`, value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
-                        { name: `${prefix}forecast`, value: 'Xem dự báo thời tiết', inline: true },
-                        { name: `${prefix}forecast_coord`, value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
-                        { name: `${prefix}air_pollution`, value: 'Xem thông tin ô nhiễm không khí', inline: true },
-                        { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
-                        { name: `${prefix}donate`, value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
-                        { name: `${prefix}geo ltc (hoặc location_to_coords)`, value: 'Chuyển đổi từ địa điểm sang tọa độ', inline: true },
-                        { name: `${prefix}geo ctl (hoặc coords_to_location)`, value: 'Chuyển đổi từ tọa độ sang địa điểm', inline: true }
-                    )
-            ]
-        });
-    }
-
-    if (command === 'air_pollution') {
-        const lat = args[0];
-        const lon = args[1];
-        if (!lat || !lon) return message.reply('⚠ Vui lòng cung cấp tọa độ (vĩ độ, kinh độ).');
-        console.log(`Đang lấy thông tin ô nhiễm không khí theo tọa độ (${lat}, ${lon})...`);
-        const result = await getAirPollutionData(lat, lon);
-        await message.reply(result.error ? result.content : { embeds: [result.embed] });
-    }
-});
-
+}
 async function fetchWeatherData(location) {
     console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
     try {
@@ -594,6 +453,25 @@ function buildAirPollutionEmbed(data) {
             { name: '🌫 SO2', value: `${data.list[0].components.so2} µg/m³`, inline: true }
         )
         .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by @random.person.255' })
+        .setTimestamp();
+}
+
+function buildSatelliteRadiationEmbed(data) {
+    const todayIndex = data.daily.time.indexOf(data.daily.time[data.daily.time.length - 1]);
+    if (todayIndex === -1) {
+        return new EmbedBuilder().setDescription('⚠ Không có dữ liệu bức xạ vệ tinh cho ngày hôm nay.');
+    }
+    return new EmbedBuilder()
+        .setTitle(`☀ Dữ liệu bức xạ vệ tinh ở (${data.latitude}, ${data.longitude})`)
+        .setColor(0xffcc70)
+        .addFields(
+            { name: '🌅 Bình minh (sunrise)', value: `${data.daily.sunrise[todayIndex]}`, inline: true },
+            { name: '🌇 Hoàng hôn (sunset)', value: `${data.daily.sunset[todayIndex]}`, inline: true },
+            { name: '⏳ Thời gian ban ngày (daylight duration)', value: `${data.daily.daylight_duration[todayIndex] != null ? data.daily.daylight_duration[todayIndex] : 0} giây`, inline: true },
+            { name: '☀ Thời gian có nắng (sunshine duration)', value: `${data.daily.sunshine_duration[todayIndex] != null ? data.daily.sunshine_duration[todayIndex] : 0} giây`, inline: true },
+            { name: '🌞 Tổng bức xạ sóng ngắn (shortwave radiation sum)', value: `${data.daily.shortwave_radiation_sum[todayIndex] != null ? data.daily.shortwave_radiation_sum[todayIndex] : 0} MJ/m²`, inline: true }
+        )
+        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by @random.person.255' })
         .setTimestamp();
 }
 
