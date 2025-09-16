@@ -239,7 +239,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const sub = interaction.options.getSubcommand();
         if (sub === "info") {
             await interaction.deferReply();
-            const ip = options.getString('address').trim();
+            const ip = options.getString('address');
             const res = await getIPInfo(ip);
             await interaction.editReply(res.content);
         }
