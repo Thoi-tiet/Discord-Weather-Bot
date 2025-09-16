@@ -166,7 +166,8 @@ const commands = [
         .setName("IP")
         .setDescription("Xem thông tin địa chỉ IP")
         .addSubcommand(sub =>
-            sub.setName("info")
+            sub
+                .setName("info")
                 .setDescription("Xem thông tin địa chỉ IP")
                 .addStringOption(option =>
                     option.setName('IP_address').setDescription('Địa chỉ IP').setRequired(true)
