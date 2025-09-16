@@ -240,16 +240,8 @@ client.on(Events.InteractionCreate, async interaction => {
         if (sub === "info") {
             await interaction.deferReply();
             const ip = options.getString('address').trim();
-            try {
-                const res = await fetch("https://api.country.is/" + ip);
-                const data = res.json();
-                if (data.error) {
-                    return interaction.editReply("⚠ Địa chỉ IP không hợp lệ.");
-                }
-                await interaction.editReply("Địa chỉ IP: " + ip + "\nQuốc gia: " + data.country + "\nMã quốc gia: " + data.country_code + "\nThành phố: " + data.city + "\nNhà cung cấp dịch vụ Internet (ISP): " + data.isp);
-            } catch {
-                return interaction.editReply("❌ Lỗi khi lấy thông tin địa chỉ IP.");
-            }
+            const res = await getIPInfo(ip);
+            await interaction.editReply(res.content);
         }
     }
 
@@ -426,6 +418,19 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
+
+async function getIPInfo(ip) {
+    try {
+        const res = await fetch("https://api.country.is/" + ip);
+        const data = res.json();
+        if (data.error) {
+            return { error: true, content: `❌ Không tìm thấy thông tin cho địa chỉ IP **${ip}**` };
+        }
+        return { error: false, content: "Địa chỉ IP: " + ip + "\nQuốc gia: " + data.country };
+    } catch {
+        return { error: true, content: "❌ Lỗi khi lấy thông tin địa chỉ IP." };
+    }
+}
 
 async function getFloodRisk(lat, lon) {
     console.log(`Đang lấy thông tin nguy cơ ngập lụt cho tọa độ (${lat}, ${lon})...`);
