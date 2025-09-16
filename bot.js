@@ -144,6 +144,24 @@ const commands = [
         .addNumberOption(option =>
             option.setName('longitude').setDescription('Kinh độ').setRequired(true)
         ),
+    new SlashCommandBuilder()
+        .setName('elevation')
+        .setDescription('Xem độ cao so với mực nước biển')
+        .addNumberOption(option =>
+            option.setName('latitude').setDescription('Vĩ độ').setRequired(true)
+        )
+        .addNumberOption(option =>
+            option.setName('longitude').setDescription('Kinh độ').setRequired(true)
+        ),
+    new SlashCommandBuilder()
+        .setName("flood")
+        .setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)")
+        .addNumberOption(option =>
+            option.setName('latitude').setDescription('Vĩ độ').setRequired(true)
+        )
+        .addNumberOption(option =>
+            option.setName('longitude').setDescription('Kinh độ').setRequired(true)
+        ),
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -253,6 +271,28 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.editReply({ embeds: [donateEmbed] });
     }
 
+    if (commandName === 'elevation') {
+        await interaction.deferReply();
+        const lat = options.getNumber('latitude');
+        const lon = options.getNumber('longitude');
+        const res = await getElevation(lat, lon);
+        if (res.error) {
+            return interaction.editReply(res.content);
+        }
+        await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
+    }
+
+    if (commandName === 'flood') {
+        await interaction.deferReply();
+        const lat = options.getNumber('latitude');
+        const lon = options.getNumber('longitude');
+        const res = await getFloodRisk(lat, lon);
+        if (res.error) {
+            return interaction.editReply(res.content);
+        }
+        await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
+    }
+
     // Thêm trợ giúp
 
     if (commandName === 'help') {
@@ -357,10 +397,22 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
+
+async function getFloodRisk(lat, lon) {
+    console.log(`Đang lấy thông tin nguy cơ ngập lụt cho tọa độ (${lat}, ${lon})...`);
+    try {
+        const res = await fetch(`https://flood-api.open-meteo.com/v1/flood?latitude=${lat}&longitude=${lon}&daily=river_discharge,river_discharge_mean,river_discharge_median,river_discharge_max,river_discharge_min,river_discharge_p25,river_discharge_p75&timezone=Asia%2FBangkok`);
+        const data = await res.json();
+        if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu ngập lụt cho tọa độ (${lat}, ${lon})` };
+        return { error: false, embed: buildFloodEmbed(data) };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối Flood API.' };
+    }
+}
 async function getSatelliteRadiation(lat, lon) {
     console.log(`Đang lấy thông tin bức xạ vệ tinh cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://satellite-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset,daylight_duration,sunshine_duration,shortwave_radiation_sum&models=satellite_radiation_seamless`)
+        const res = await fetch(`https://satellite-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset,daylight_duration,sunshine_duration,shortwave_radiation_sum&models=satellite_radiation_seamless&timezone=Asia%2FBangkok`)
         const data = await res.json();
         if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu bức xạ vệ tinh cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildSatelliteRadiationEmbed(data) };
@@ -418,6 +470,18 @@ async function fetchWeatherDataByCoords(lat, lon) {
     }
 }
 
+async function getElevation(lat, lon) {
+    console.log(`Đang lấy thông tin độ cao cho tọa độ (${lat}, ${lon})...`);
+    try {
+        const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+        const data = await res.json();
+        if (data.elevation === undefined) return { error: true, content: `❌ Không tìm thấy dữ liệu độ cao cho tọa độ (${lat}, ${lon})` };
+        return { error: false, content: `Độ cao ở (${lat}, ${lon}): ${data.elevation} m` };
+    } catch {
+        return { error: true, content: '⚠ Lỗi khi kết nối Open-Meteo.' };
+    }
+}
+
 async function getAirPollutionData(lat, lon) {
     console.log(`Đang lấy thông tin ô nhiễm không khí cho tọa độ (${lat}, ${lon})...`);
     try {
@@ -431,6 +495,31 @@ async function getAirPollutionData(lat, lon) {
 }
 
 // build embed
+function buildFloodEmbed(data) {
+    const time = data.daily.time[0];
+    const river_discharge = data.daily.river_discharge[0];
+    const river_discharge_mean = data.daily.river_discharge_mean[0];
+    const river_discharge_median = data.daily.river_discharge_median[0];
+    const river_discharge_max = data.daily.river_discharge_max[0];
+    const river_discharge_min = data.daily.river_discharge_min[0];
+    const river_discharge_p25 = data.daily.river_discharge_p25[0];
+    const river_discharge_p75 = data.daily.river_discharge_p75[0];
+    return new EmbedBuilder()
+        .setTitle(`🌊 Nguy cơ ngập lụt ở (${data.latitude}, ${data.longitude})`)
+        .setColor(0x3498db)
+        .addFields(
+            { name: '📅 Ngày', value: `${time}`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy (river discharge)', value: `${river_discharge} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy trung bình (river discharge mean)', value: `${river_discharge_mean} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy trung vị (river discharge median)', value: `${river_discharge_median} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy tối đa (river discharge max)', value: `${river_discharge_max} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy tối thiểu (river discharge min)', value: `${river_discharge_min} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy phần trăm 25 (river discharge p25)', value: `${river_discharge_p25} m³/s`, inline: true },
+            { name: '💧 Lưu lượng dòng chảy phần trăm 75 (river discharge p75)', value: `${river_discharge_p75} m³/s`, inline: true }
+        )
+        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by @random.person.255' })
+        .setTimestamp();
+}
 function buildAirPollutionEmbed(data) {
     const aqi = data.list[0].main.aqi;
     let aqiDescription = '';
