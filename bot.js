@@ -339,7 +339,10 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
                         { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
                         { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true },
-                        { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true }
+                        { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
+                        { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
+                        { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
+                        { name: '/IP info', value: 'Xem thông tin địa chỉ IP', inline: true },
                     )
             ]
         });
