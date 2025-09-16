@@ -276,10 +276,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const res = await getElevation(lat, lon);
-        if (res.error) {
-            return interaction.editReply(res.content);
-        }
-        await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
+        await interaction.editReply(res.content);
     }
 
     if (commandName === 'flood') {
