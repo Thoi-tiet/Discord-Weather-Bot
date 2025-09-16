@@ -6,13 +6,6 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 require('./keepalive.js');
 
 const default_prefix = "w!";
-let prefixes = {};
-try {
-    prefixes = JSON.parse(fs.readFileSync('./prefixes.json', 'utf8'));
-} catch (err) {
-    console.log(`Cannot read prefixes.json, ${err}`);
-    prefixes = {};
-}
 
 const client = new Client({
     intents: [
@@ -89,14 +82,6 @@ const commands = [
     new SlashCommandBuilder()
         .setName('help')
         .setDescription('Hiển thị thông tin trợ giúp'),
-    new SlashCommandBuilder()
-        .setName('setprefix')
-        .setDescription('Thay đổi tiền tố')
-        .addStringOption(opt =>
-            opt.setName('prefix')
-                .setDescription('Tiền tố mới')
-                .setRequired(true)
-        ),
     new SlashCommandBuilder()
         .setName('air_pollution')
         .setDescription('Xem thông tin ô nhiễm không khí')
@@ -268,31 +253,11 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
                         { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
-                        { name: '/setprefix', value: 'Thay đổi tiền tố', inline: true },
                         { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true },
                         { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true }
                     )
             ]
         });
-    }
-
-    if (commandName === 'setprefix') {
-        await interaction.deferReply();
-        if (!interaction.guild || !interaction.guildId) {
-            return interaction.editReply({ content: '❌ Bạn chỉ có thể dùng lệnh này trong một server mà bot đang tham gia.', ephemeral: true });
-        }
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return interaction.editReply({ content: '❌ Bạn cần quyền Quản trị viên để đổi prefix.', ephemeral: true });
-        }
-        const newPrefix = options.getString('prefix');
-        try {
-            prefixes[interaction.guildId] = newPrefix;
-            fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
-            return interaction.editReply(`✅ Prefix đã đổi thành \`${newPrefix}\``);
-        } catch (err) {
-            console.error(err);
-            return interaction.editReply({ content: '❌ Không thể lưu prefix. Vui lòng thử lại.', ephemeral: true });
-        }
     }
 
     if (commandName === 'air_pollution') {
@@ -375,20 +340,10 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.on('messageCreate', async message => {
     if (message.author.bot || !message.guild) return;
-    const prefix = prefixes[message.guild.id] || default_prefix;
+    const prefix = default_prefix;
     if (!message.content.startsWith(prefix)) return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
-    if (command === 'setprefix') {
-        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return message.reply({ content: '❌ Bạn cần quyền Quản trị viên để đổi prefix.', ephemeral: true });
-        }
-        const newPrefix = args[0];
-        if (!newPrefix) return message.reply('⚠ Vui lòng cung cấp tiền tố mới.');
-        prefixes[message.guild.id] = newPrefix;
-        fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 4));
-        return message.reply(`✅ Đã thay đổi tiền tố thành \`${newPrefix}\``);
-    }
 
     if (command === 'donate') {
 
@@ -536,7 +491,6 @@ client.on('messageCreate', async message => {
                         { name: `${prefix}forecast_coord`, value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
                         { name: `${prefix}air_pollution`, value: 'Xem thông tin ô nhiễm không khí', inline: true },
                         { name: `${prefix}help`, value: 'Hiển thị thông tin trợ giúp', inline: true },
-                        { name: `${prefix}setprefix`, value: 'Thay đổi tiền tố lệnh', inline: true },
                         { name: `${prefix}donate`, value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
                         { name: `${prefix}geo ltc (hoặc location_to_coords)`, value: 'Chuyển đổi từ địa điểm sang tọa độ', inline: true },
                         { name: `${prefix}geo ctl (hoặc coords_to_location)`, value: 'Chuyển đổi từ tọa độ sang địa điểm', inline: true }
