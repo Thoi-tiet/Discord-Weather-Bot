@@ -192,6 +192,28 @@ client.once('ready', () => {
     });
 });
 
+client.on('guildCreate', async guild => {
+    try {
+        const owner = await guild.fetchOwner();
+
+        const embed = new EmbedBuilder()
+            .setTitle(`🎉 Cảm ơn bạn vì đã mời ${client.user.username}!`)
+            .setDescription(`Bot đã được thêm vào server **${guild.name}** với **${guild.memberCount} thành viên**.`)
+            .addFields(
+                { name: "📖 Hướng dẫn", value: "Dùng lệnh `/help` để xem các lệnh khả dụng." },
+                { name: "☁️ Nguồn dữ liệu", value: "Dữ liệu thời tiết được cung cấp bởi OpenWeatherMap và Open-Meteo." },
+            )
+            .setColor(0x00AE86)
+            .setThumbnail(client.user.displayAvatarURL())
+            .setTimestamp();
+
+        await owner.send({ embeds: [embed] });
+        console.log(`✅ Đã gửi DM cảm ơn tới owner của ${guild.name}`);
+    } catch (err) {
+        console.error(`❌ Không thể gửi DM cho owner của ${guild.name}:`, err);
+    }
+});
+
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
