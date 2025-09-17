@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -173,6 +173,9 @@ const commands = [
                     option.setName('address').setDescription('Địa chỉ IP').setRequired(true)
                 )
         ),
+    new SlashCommandBuilder()
+        .setName("vote")
+        .setDescription("Bỏ phiếu cho bot trên top.gg")
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -217,6 +220,25 @@ client.on('guildCreate', async guild => {
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
+
+    if (commandName === 'vote') {
+        await interaction.deferReply();
+        // Thêm link bot trên top.gg và nút nhấn để vote
+        const voteEmbed = new EmbedBuilder()
+            .setColor(0x00AE86)
+            .setTitle('🌟 Vote cho Weather#6014 trên top.gg!')
+            .setDescription('Nếu bạn thích bot, hãy dành một chút thời gian để vote cho bot trên top.gg. Điều này giúp bot phát triển và tiếp cận nhiều người hơn!')
+            // .setURL('https://top.gg/bot/1403622819648110664/vote')
+            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+        const voteButton = new ButtonBuilder()
+            .setLabel('Vote trên top.gg')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://top.gg/bot/1403622819648110664/vote')
+            .setEmoji('⭐');
+        const row = new ActionRowBuilder()
+            .addComponents(voteButton);
+        await interaction.editReply({ embeds: [voteEmbed], components: [row] });
+    }
 
     if (commandName === 'weather_icon') {
         await interaction.deferReply();
