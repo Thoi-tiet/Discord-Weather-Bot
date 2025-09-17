@@ -220,6 +220,11 @@ client.on('guildCreate', async guild => {
             .addComponents(btn);
 
         await owner.send({ embeds: [embed], components: [row] });
+        setTimeout(async () => {
+            const disabledRow = new ActionRowBuilder()
+                .addComponents(btn.setDisabled(true));
+            await owner.send({ components: [disabledRow] });
+        }, 60000); // 1 phút
         console.log(`✅ Đã gửi DM cảm ơn tới owner của ${guild.name}`);
     } catch (err) {
         console.error(`❌ Không thể gửi DM cho owner của ${guild.name}:`, err);
