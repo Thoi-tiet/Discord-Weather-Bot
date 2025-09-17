@@ -8,6 +8,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/healthz', (req, res) => res.sendStatus(200));
-app.listen(process.env.PORT != undefined ? process.env.PORT : 3000, () => {
-  console.log(`Health check tại http://localhost:${process.env.PORT || 3000}/healthz`);
+const port = process.env.PORT || 5000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Health check tại http://0.0.0.0:${port}/healthz`);
 });
