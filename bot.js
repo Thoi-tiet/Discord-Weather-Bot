@@ -201,16 +201,25 @@ client.on('guildCreate', async guild => {
 
         const embed = new EmbedBuilder()
             .setTitle(`🎉 Cảm ơn bạn vì đã mời ${client.user.username}!`)
-            .setDescription(`Bot đã được thêm vào server **${guild.name}** với **${guild.memberCount} thành viên**.`)
+            .setDescription(`Bot đã được thêm vào server **${guild.name}** với **${guild.memberCount} thành viên**,
+                Nếu bạn thích bot, bạn có thể vote trên top.gg.`)
             .addFields(
                 { name: "📖 Hướng dẫn", value: "Dùng lệnh `/help` để xem các lệnh khả dụng." },
                 { name: "☁️ Nguồn dữ liệu", value: "Dữ liệu thời tiết được cung cấp bởi OpenWeatherMap và Open-Meteo." },
             )
             .setColor(0x00AE86)
             .setThumbnail(client.user.displayAvatarURL())
+            .setFooter({ text: 'Dev by @random.person.255' })
             .setTimestamp();
+        const btn = new ButtonBuilder()
+            .setLabel('Vote bot trên top.gg')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://top.gg/bot/1403622819648110664/vote')
+            .setEmoji('⭐');
+        const row = new ActionRowBuilder()
+            .addComponents(btn);
 
-        await owner.send({ embeds: [embed] });
+        await owner.send({ embeds: [embed], components: [row] });
         console.log(`✅ Đã gửi DM cảm ơn tới owner của ${guild.name}`);
     } catch (err) {
         console.error(`❌ Không thể gửi DM cho owner của ${guild.name}:`, err);
@@ -238,6 +247,12 @@ client.on(Events.InteractionCreate, async interaction => {
         const row = new ActionRowBuilder()
             .addComponents(voteButton);
         await interaction.editReply({ embeds: [voteEmbed], components: [row] });
+        // nếu đợi lâu quá thì disable nút
+        setTimeout(async () => {
+            const disabledRow = new ActionRowBuilder()
+                .addComponents(voteButton.setDisabled(true));
+            await interaction.editReply({ components: [disabledRow] });
+        }, 60000); // 1 phút
     }
 
     if (commandName === 'weather_icon') {
