@@ -34,10 +34,6 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 41983
-externalPort = 3000
-
 [deployment]
 deploymentTarget = "vm"
 run = ["node", "bot.js"]
