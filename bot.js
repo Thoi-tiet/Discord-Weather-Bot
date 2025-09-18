@@ -362,7 +362,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'donate') {
-        await interaction.deferReply(/*{ ephemeral: true }*/);
+        await interaction.deferReply();
         const btn = new ButtonBuilder()
             .setLabel('Ủng hộ qua Patreon')
             .setStyle(ButtonStyle.Link)
@@ -375,7 +375,7 @@ client.on(Events.InteractionCreate, async interaction => {
             .setEmoji('☕');
 
         const row = new ActionRowBuilder()
-            .addComponents(btn, donate_btn, buymeacoffee_btn);
+            .addComponents(btn, buymeacoffee_btn);
 
         const donateEmbed = new EmbedBuilder()
             .setColor(0xffcc70)
@@ -390,9 +390,9 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.editReply({ embeds: [donateEmbed], components: [row] });
         setTimeout(async () => {
             const disabledRow = new ActionRowBuilder()
-                .addComponents(btn.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+                .addComponents(btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
             await interaction.editReply({ components: [disabledRow] });
-        });
+        }, 60000); // 1 phút
     }
 
     if (commandName === 'elevation') {
