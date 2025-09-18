@@ -193,7 +193,7 @@ client.once('ready', () => {
     });
 });
 client.once('error', err => {
-    console.error('Lỗi bot: \n```' + err + '\n```');
+    console.error('Lỗi bot: \n```\n' + err + '\n```');
 })
 
 client.on('guildCreate', async guild => {
@@ -364,11 +364,6 @@ client.on(Events.InteractionCreate, async interaction => {
     if (commandName === 'donate') {
         await interaction.deferReply(/*{ ephemeral: true }*/);
         const btn = new ButtonBuilder()
-            .setLabel('Ủng hộ qua Patreon')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://www.patreon.com/randomperson255')
-            .setEmoji('💖');
-        const donate_btn = new ButtonBuilder()
             .setLabel('Ủng hộ qua Patreon')
             .setStyle(ButtonStyle.Link)
             .setURL('https://www.patreon.com/randomperson255')
