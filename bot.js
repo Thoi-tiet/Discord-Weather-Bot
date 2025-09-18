@@ -260,13 +260,23 @@ client.on(Events.InteractionCreate, async interaction => {
             .setStyle(ButtonStyle.Link)
             .setURL('https://top.gg/bot/1403622819648110664/vote')
             .setEmoji('⭐');
+        const donate_btn = new ButtonBuilder()
+            .setLabel('Ủng hộ qua Patreon')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.patreon.com/randomperson255')
+            .setEmoji('💖');
+        const buymeacoffee_btn = new ButtonBuilder()
+            .setLabel('Mời mình một ly cà phê')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.buymeacoffee.com/random.person.255')
+            .setEmoji('☕');
         const row = new ActionRowBuilder()
-            .addComponents(voteButton);
+            .addComponents(voteButton, donate_btn, buymeacoffee_btn);
         await interaction.editReply({ embeds: [voteEmbed], components: [row] });
         // nếu đợi lâu quá thì disable nút
         setTimeout(async () => {
             const disabledRow = new ActionRowBuilder()
-                .addComponents(voteButton.setDisabled(true));
+                .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
             await interaction.editReply({ components: [disabledRow] });
         }, 60000); // 1 phút
     }
@@ -358,6 +368,11 @@ client.on(Events.InteractionCreate, async interaction => {
             .setStyle(ButtonStyle.Link)
             .setURL('https://www.patreon.com/randomperson255')
             .setEmoji('💖');
+        const donate_btn = new ButtonBuilder()
+            .setLabel('Ủng hộ qua Patreon')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.patreon.com/randomperson255')
+            .setEmoji('💖');
         const buymeacoffee_btn = new ButtonBuilder()
             .setLabel('Mời mình một ly cà phê')
             .setStyle(ButtonStyle.Link)
@@ -365,7 +380,7 @@ client.on(Events.InteractionCreate, async interaction => {
             .setEmoji('☕');
 
         const row = new ActionRowBuilder()
-            .addComponents(btn, buymeacoffee_btn);
+            .addComponents(btn, donate_btn, buymeacoffee_btn);
 
         const donateEmbed = new EmbedBuilder()
             .setColor(0xffcc70)
