@@ -363,7 +363,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'donate') {
         await interaction.deferReply();
-        const btn = new ButtonBuilder()
+        const donate_btn = new ButtonBuilder()
             .setLabel('Ủng hộ qua Patreon')
             .setStyle(ButtonStyle.Link)
             .setURL('https://www.patreon.com/randomperson255')
@@ -373,10 +373,6 @@ client.on(Events.InteractionCreate, async interaction => {
             .setStyle(ButtonStyle.Link)
             .setURL('https://www.buymeacoffee.com/random.person.255')
             .setEmoji('☕');
-
-        const row = new ActionRowBuilder()
-            .addComponents(btn, buymeacoffee_btn);
-
         const donateEmbed = new EmbedBuilder()
             .setColor(0xffcc70)
             .setTitle('☕ Ủng hộ Thời tiết#6014')
@@ -385,13 +381,24 @@ client.on(Events.InteractionCreate, async interaction => {
                 { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
                 { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
             )
-            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' })
+            .setTimestamp();
+
+        const row = new ActionRowBuilder()
+            .addComponents(donate_btn, buymeacoffee_btn);
 
         await interaction.editReply({ embeds: [donateEmbed], components: [row] });
         setTimeout(async () => {
             const disabledRow = new ActionRowBuilder()
-                .addComponents(btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-            await interaction.editReply({ components: [disabledRow] });
+                .addComponents(donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+            // Only attempt to edit if interaction is still valid
+            if (interaction.channel) {
+                try {
+                    await interaction.editReply({ components: [disabledRow] });
+                } catch (err) {
+                    // Silently ignore errors caused by expired interaction
+                }
+            }
         }, 60000); // 1 phút
     }
 
@@ -439,6 +446,7 @@ client.on(Events.InteractionCreate, async interaction => {
                         { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
                         { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
                         { name: '/ip info', value: 'Xem thông tin địa chỉ IP', inline: true },
+                        { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true }
                     )
             ]
         });
