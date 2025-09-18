@@ -188,10 +188,13 @@ client.once('ready', () => {
         activities: [
             { name: 'Đang theo dõi thời tiết 🌦', type: 3 },
         ],
-        status: 'online',
+        status: 'dnd',
         afk: false
     });
 });
+client.once('error', err => {
+    console.error('Lỗi bot: \n```' + err + '\n```');
+})
 
 client.on('guildCreate', async guild => {
     try {
