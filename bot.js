@@ -6,6 +6,10 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 require('./keepalive.js');
 
 const default_prefix = "w!";
+const complain_btn = new ButtonBuilder()
+    .setLabel('Bạn thấy không đúng?')
+    .setStyle(ButtonStyle.Danger)
+    .setCustomId(`complain_${guild.id}`)
 
 const client = new Client({
     intents: [
@@ -216,13 +220,23 @@ client.on('guildCreate', async guild => {
             .setStyle(ButtonStyle.Link)
             .setURL('https://top.gg/bot/1403622819648110664/vote')
             .setEmoji('⭐');
+        const donate_btn = new ButtonBuilder()
+            .setLabel('Ủng hộ qua Patreon')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.patreon.com/randomperson255')
+            .setEmoji('💖');
+        const buymeacoffee_btn = new ButtonBuilder()
+            .setLabel('Mời mình một ly cà phê')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.buymeacoffee.com/random.person.255')
+            .setEmoji('☕');
         const row = new ActionRowBuilder()
-            .addComponents(btn);
+            .addComponents(btn, donate_btn, buymeacoffee_btn);
 
         await owner.send({ embeds: [embed], components: [row] });
         setTimeout(async () => {
             const disabledRow = new ActionRowBuilder()
-                .addComponents(btn.setDisabled(true));
+                .addComponents(btn.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
             await owner.send({ components: [disabledRow] });
         }, 60000); // 1 phút
         console.log(`✅ Đã gửi DM cảm ơn tới owner của ${guild.name}`);
@@ -240,7 +254,7 @@ client.on(Events.InteractionCreate, async interaction => {
         // Thêm link bot trên top.gg và nút nhấn để vote
         const voteEmbed = new EmbedBuilder()
             .setColor(0x00AE86)
-            .setTitle('🌟 Vote cho Weather#6014 trên top.gg!')
+            .setTitle('🌟 Vote cho Thời tiết#6014 trên top.gg!')
             .setDescription('Nếu bạn thích bot, hãy dành một chút thời gian để vote cho bot trên top.gg. Điều này giúp bot phát triển và tiếp cận nhiều người hơn!')
             // .setURL('https://top.gg/bot/1403622819648110664/vote')
             .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
@@ -342,10 +356,23 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'donate') {
         await interaction.deferReply(/*{ ephemeral: true }*/);
+        const btn = new ButtonBuilder()
+            .setLabel('Ủng hộ qua Patreon')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.patreon.com/randomperson255')
+            .setEmoji('💖');
+        const buymeacoffee_btn = new ButtonBuilder()
+            .setLabel('Mời mình một ly cà phê')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.buymeacoffee.com/random.person.255')
+            .setEmoji('☕');
+
+        const row = new ActionRowBuilder()
+            .addComponents(btn, buymeacoffee_btn);
 
         const donateEmbed = new EmbedBuilder()
             .setColor(0xffcc70)
-            .setTitle('☕ Ủng hộ Weather#6014')
+            .setTitle('☕ Ủng hộ Thời tiết#6014')
             .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
             .addFields(
                 { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
@@ -353,7 +380,12 @@ client.on(Events.InteractionCreate, async interaction => {
             )
             .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
 
-        await interaction.editReply({ embeds: [donateEmbed] });
+        await interaction.editReply({ embeds: [donateEmbed], components: [row] });
+        setTimeout(async () => {
+            const disabledRow = new ActionRowBuilder()
+                .addComponents(btn.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+            await interaction.editReply({ components: [disabledRow] });
+        });
     }
 
     if (commandName === 'elevation') {
