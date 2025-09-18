@@ -5,12 +5,6 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 
 require('./keepalive.js');
 
-const default_prefix = "w!";
-const complain_btn = new ButtonBuilder()
-    .setLabel('Bạn thấy không đúng?')
-    .setStyle(ButtonStyle.Danger)
-    .setCustomId(`complain_${guild.id}`)
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
