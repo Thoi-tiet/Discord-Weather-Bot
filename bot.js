@@ -362,45 +362,60 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'donate') {
-        await interaction.deferReply();
-        const donate_btn = new ButtonBuilder()
-            .setLabel('Ủng hộ qua Patreon')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://www.patreon.com/randomperson255')
-            .setEmoji('💖');
-        const buymeacoffee_btn = new ButtonBuilder()
-            .setLabel('Mời mình một ly cà phê')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://www.buymeacoffee.com/random.person.255')
-            .setEmoji('☕');
-        const donateEmbed = new EmbedBuilder()
-            .setColor(0xffcc70)
-            .setTitle('☕ Ủng hộ Thời tiết#6014')
-            .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
-            .addFields(
-                { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
-                { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
-            )
-            .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' })
-            .setTimestamp();
+        try {
+            // Acknowledge ngay
+            if (!interaction.deferred && !interaction.replied) {
+                await interaction.deferReply();
+            }
 
-        const row = new ActionRowBuilder()
-            .addComponents(donate_btn, buymeacoffee_btn);
+            // Nút donate
+            const donate_btn = new ButtonBuilder()
+                .setLabel('Ủng hộ qua Patreon')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.patreon.com/randomperson255')
+                .setEmoji('💖');
 
-        await interaction.editReply({ embeds: [donateEmbed], components: [row] });
-        setTimeout(async () => {
-            const disabledRow = new ActionRowBuilder()
-                .addComponents(donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-            // Only attempt to edit if interaction is still valid
-            if (interaction.channel) {
+            const buymeacoffee_btn = new ButtonBuilder()
+                .setLabel('Mời mình một ly cà phê')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.buymeacoffee.com/random.person.255')
+                .setEmoji('☕');
+
+            const donateEmbed = new EmbedBuilder()
+                .setColor(0xffcc70)
+                .setTitle(`☕ Ủng hộ ${client.user.username}`)
+                .setDescription('Nếu bạn thấy bot hữu ích, hãy ủng hộ để mình có thêm động lực duy trì và phát triển 💖')
+                .addFields(
+                    { name: 'Patreon', value: '[👉 Ủng hộ qua Patreon](https://www.patreon.com/randomperson255)', inline: true },
+                    { name: 'BuyMeACoffee', value: '[☕ Mời mình một ly cà phê](https://www.buymeacoffee.com/random.person.255)', inline: true }
+                )
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' })
+                .setTimestamp();
+
+            const row = new ActionRowBuilder().addComponents(donate_btn, buymeacoffee_btn);
+
+            await interaction.editReply({ embeds: [donateEmbed], components: [row] });
+
+            // Sau 1 phút disable nút
+            setTimeout(async () => {
                 try {
+                    const disabledRow = new ActionRowBuilder().addComponents(
+                        ButtonBuilder.from(donate_btn).setDisabled(true),
+                        ButtonBuilder.from(buymeacoffee_btn).setDisabled(true)
+                    );
                     await interaction.editReply({ components: [disabledRow] });
                 } catch (err) {
-                    // Silently ignore errors caused by expired interaction
+                    console.warn("Không thể update tin nhắn donate:", err.message);
                 }
+            }, 60000);
+        } catch (err) {
+            console.error("Lỗi khi xử lý donate:", err);
+            if (interaction.deferred) {
+                await interaction.editReply("❌ Có lỗi xảy ra khi gửi thông tin donate.");
             }
-        }, 60000); // 1 phút
+        }
     }
+
 
     if (commandName === 'elevation') {
         await interaction.deferReply();
