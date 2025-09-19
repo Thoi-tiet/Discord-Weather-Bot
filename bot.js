@@ -4,6 +4,7 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 require('./keepalive.js');
+require('./BotData/voting.js');
 
 const client = new Client({
     intents: [
