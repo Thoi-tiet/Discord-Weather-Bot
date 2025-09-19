@@ -24,7 +24,7 @@ app.post('/topgg-webhook', (req, res) => {
         member.send({ embeds: [embed] });
         console.log(`Đã gửi DM đến user: ${user}`);
     } else {
-        console.log(`Khoong thể gửi DM đến user: ${user}`);
+        console.log(`Không thể gửi DM đến user: ${user}`);
     }
     res.sendStatus(200);
 });
