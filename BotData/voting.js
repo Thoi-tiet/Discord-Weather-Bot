@@ -1,8 +1,10 @@
 const express = require('express');
 require('dotenv').config();
 const app = express();
+const bodyParser = require('body-parser');
+const crypto = require('crypto');
 
-app.use(express.json())
+app.use(bodyParser.json());
 const { client, EmbedBuilder } = require('../bot.js');
 app.post('/topgg-webhook', (req, res) => {
     const auth = req.headers.authorization;
@@ -10,7 +12,7 @@ app.post('/topgg-webhook', (req, res) => {
         return res.status(401).send('Unauthorized');
     }
     const { user, type } = req.body;
-    console.log(`Received vote from user: ${user}`);
+    console.log(`Received vote from user: ${user}, type: ${type}`);
     const member = client.users.cache.get(user);
     if (member) {
         const embed = new EmbedBuilder()
