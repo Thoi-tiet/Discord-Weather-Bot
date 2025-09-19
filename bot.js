@@ -808,3 +808,6 @@ function buildForecastEmbed(data, hours, title) {
 }
 
 client.login(TOKEN);
+module.exports = {
+    client, EmbedBuilder
+};
