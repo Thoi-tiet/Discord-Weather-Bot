@@ -22,6 +22,9 @@ app.post('/topgg-webhook', (req, res) => {
             .setFooter({ text: 'Vote thành công!\nDev by @random.person.255' })
             .setTimestamp();
         member.send({ embeds: [embed] });
+        console.log(`Đã gửi DM đến user: ${user}`);
+    } else {
+        console.log(`Khoong thể gửi DM đến user: ${user}`);
     }
     res.sendStatus(200);
 });
