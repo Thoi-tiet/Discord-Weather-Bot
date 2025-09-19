@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
 app.use(bodyParser.json());
-const { client, EmbedBuilder } = require('../bot.js');
+const { client, EmbedBuilder } = require('./bot.js');
 app.post('/topgg-webhook', (req, res) => {
     const auth = req.headers.authorization;
     if (auth !== process.env.TOPGG_WEBHOOK_AUTH) {
