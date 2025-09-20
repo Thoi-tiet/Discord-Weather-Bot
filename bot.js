@@ -2,7 +2,6 @@ const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-require('mysql')
 
 require('./keepalive.js');
 require('./voting.js');
