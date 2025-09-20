@@ -196,7 +196,9 @@ client.once('ready', () => {
 
 client.once('error', err => {
     console.error('Lỗi bot: \n```\n' + err + '\n```');
-})
+});
+
+require('./BotCommands/bot/functions.js');
 
 client.on('guildCreate', async guild => {
     try {
@@ -566,7 +568,6 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
-require('./BotCommands/bot/functions.js');
 
 client.login(TOKEN);
 module.exports = {
