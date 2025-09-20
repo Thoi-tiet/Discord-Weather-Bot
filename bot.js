@@ -2,7 +2,6 @@ const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-require('mysql')
 
 require('./keepalive.js');
 require('./voting.js');
@@ -282,6 +281,7 @@ client.on(Events.InteractionCreate, async interaction => {
                 .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
             await interaction.editReply({ components: [disabledRow] });
         }, 60000); // 1 phút
+        return;
     }
 
     if (commandName === 'weather_icon') {
@@ -292,6 +292,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return interaction.editReply(iconResult.content);
         }
         await interaction.editReply({ files: [iconResult.iconUrl] });
+        return;
     }
 
     if (commandName === 'weather_icon_coord') {
@@ -303,6 +304,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return interaction.editReply(iconResult.content);
         }
         await interaction.editReply({ files: [iconResult.iconUrl] });
+        return;
     }
 
     if (commandName === 'satellite_radiation') {
@@ -314,6 +316,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return interaction.editReply(res.content);
         }
         await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
+        return;
     }
 
     if (commandName === 'weather') {
@@ -321,6 +324,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const location = options.getString('location').trim();
         const result = await fetchWeatherData(location);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+        return;
     }
 
     if (commandName === 'ip') {
@@ -330,6 +334,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const ip = options.getString('address');
             const res = await getIPInfo(ip);
             await interaction.editReply(res.content);
+            return;
         }
     }
 
@@ -339,6 +344,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const lon = options.getNumber('longitude');
         const result = await fetchWeatherDataByCoords(lat, lon);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+        return;
     }
 
     if (commandName === 'forecast') {
@@ -350,6 +356,7 @@ client.on(Events.InteractionCreate, async interaction => {
         }
         const result = await fetchForecast(location, hours);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+        return;
     }
 
     if (commandName === 'forecast_coord') {
@@ -362,6 +369,7 @@ client.on(Events.InteractionCreate, async interaction => {
         }
         const result = await fetchForecastByCoords(lat, lon, hours);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+        return;
     }
 
     if (commandName === 'donate') {
@@ -397,8 +405,6 @@ client.on(Events.InteractionCreate, async interaction => {
 
             const row = new ActionRowBuilder().addComponents(donate_btn, buymeacoffee_btn);
 
-            await interaction.editReply({ embeds: [donateEmbed], components: [row] });
-
             // Sau 1 phút disable nút
             setTimeout(async () => {
                 try {
@@ -407,14 +413,18 @@ client.on(Events.InteractionCreate, async interaction => {
                         ButtonBuilder.from(buymeacoffee_btn).setDisabled(true)
                     );
                     await interaction.editReply({ components: [disabledRow] });
+                    return;
                 } catch (err) {
                     console.warn("Không thể update tin nhắn donate:", err.message);
                 }
             }, 60000);
+            await interaction.editReply({ embeds: [donateEmbed], components: [row] });
+            return;
         } catch (err) {
             console.error("Lỗi khi xử lý donate:", err);
             if (interaction.deferred) {
                 await interaction.editReply("❌ Có lỗi xảy ra khi gửi thông tin donate.");
+                return;
             }
         }
     }
@@ -426,6 +436,7 @@ client.on(Events.InteractionCreate, async interaction => {
         const lon = options.getNumber('longitude');
         const res = await getElevation(lat, lon);
         await interaction.editReply(res.content);
+        return;
     }
 
     if (commandName === 'flood') {
@@ -437,6 +448,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return interaction.editReply(res.content);
         }
         await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
+        return;
     }
 
     // Thêm trợ giúp
@@ -468,6 +480,7 @@ client.on(Events.InteractionCreate, async interaction => {
                     )
             ]
         });
+        return;
     }
 
     if (commandName === 'air_pollution') {
@@ -479,13 +492,15 @@ client.on(Events.InteractionCreate, async interaction => {
         try {
             const result = await getAirPollutionData(lat, lon);
             if (result.error) {
-                await interaction.editReply(result.content);
+                return interaction.editReply(result.content);
             } else {
                 await interaction.editReply({ embeds: [result.embed] });
+                return;
             }
         } catch (err) {
             console.error(err);
             await interaction.editReply('❌ Lỗi khi lấy dữ liệu chất lượng không khí.');
+            return;
         }
     }
 
@@ -513,9 +528,11 @@ client.on(Events.InteractionCreate, async interaction => {
                 await interaction.editReply(`📍 **${place.display_name}**  
 🌐 Vĩ độ (latitude): \`${place.lat}\`  
 🌐 Kinh độ (longitude): \`${place.lon}\``);
+                return;
             } catch (err) {
                 console.error(err);
                 await interaction.editReply("❌ Có lỗi xảy ra khi tìm tọa độ.");
+                return;
             }
         }
 
@@ -539,9 +556,11 @@ client.on(Events.InteractionCreate, async interaction => {
 
                 await interaction.editReply(`📍 Tọa độ: \`${lat}, ${lon}\`  
 🗺️ Địa điểm: **${data.display_name}**`);
+                return;
             } catch (err) {
                 console.error(err);
                 await interaction.editReply("❌ Có lỗi xảy ra khi tìm địa điểm.");
+                return;
             }
         }
     }
