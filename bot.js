@@ -246,6 +246,16 @@ client.on('guildCreate', async guild => {
     }
 });
 
+client.on('messageCreate', async message => {
+    if (message.author.bot) return;
+    // Nếu bot được mention
+    if (message.mentions.has(client.user)) {
+        message.reply(`👋 Xin chào <@${message.author.id}>!
+Mình luôn ở đây để giúp bạn với các thông tin thời tiết và cũng như đưa bạn đến với những trải nghiệm tốt nhất!`);
+        return;
+    }
+});
+
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
