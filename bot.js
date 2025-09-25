@@ -5,6 +5,8 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 
 require('./keepalive.js');
 require('./voting.js');
+const { setGuildPrefix } = require('./db.js');
+const { custom_prefix } = require('./custom_prefix.js');
 
 const client = new Client({
     intents: [
@@ -174,7 +176,15 @@ const commands = [
         ),
     new SlashCommandBuilder()
         .setName("vote")
-        .setDescription("Bỏ phiếu cho bot trên top.gg")
+        .setDescription("Bỏ phiếu cho bot trên top.gg"),
+    new SlashCommandBuilder()
+        .setName("setprefix")
+        .setDescription("Đặt tiền tố tùy chỉnh cho server này (chỉ dành cho quản trị viên)")
+        .addStringOption(option =>
+            option.setName('prefix').setDescription('Tiền tố mới (1-10 ký tự)').setRequired(true)
+                .setMinLength(1)
+                .setMaxLength(10)
+        )
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -254,6 +264,7 @@ client.on('messageCreate', async message => {
 Mình luôn ở đây để giúp bạn với các thông tin thời tiết và cũng như đưa bạn đến với những trải nghiệm tốt nhất!`);
         return;
     }
+    await custom_prefix(message);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -293,6 +304,19 @@ client.on(Events.InteractionCreate, async interaction => {
                 .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
             await interaction.editReply({ components: [disabledRow] });
         }, 60000); // 1 phút
+        return;
+    }
+
+    if (commandName === 'setprefix') {
+        await interaction.deferReply();
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            return interaction.editReply('❌ Bạn cần có quyền Quản trị viên để sử dụng lệnh này.');
+        }
+
+        const newPrefix = options.getString('prefix');
+        // Cập nhật tiền tố trong cơ sở dữ liệu
+        await setGuildPrefix(interaction.guild.id, newPrefix);
+        await interaction.editReply(`✅ Đã cập nhật tiền tố thành \`${newPrefix}\``);
         return;
     }
 

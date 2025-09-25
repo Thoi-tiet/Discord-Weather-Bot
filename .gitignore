@@ -1,7 +1,6 @@
 # Project specific
 /weather bot web
 /DiscordWeatherBot
-custom_prefix.js
 
 # Node.js
 node_modules/
@@ -38,3 +37,5 @@ coverage/
 
 # Dependency directories
 .nyc_output
+
+BotCommands/lang.js
