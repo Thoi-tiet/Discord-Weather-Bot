@@ -11,7 +11,7 @@ async function getGuildSettings(guildId) {
     const [rows] = await db.query("SELECT * FROM guild_settings WHERE guild_id = ?", [guildId]);
     if (rows.length === 0) {
         await db.query("INSERT INTO guild_settings (guild_id) VALUES (?)", [guildId]);
-        return { prefix: 'w!' };
+        return { prefix: 'wt!' };
     }
     return rows[0];
 }

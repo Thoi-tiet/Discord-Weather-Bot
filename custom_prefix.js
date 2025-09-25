@@ -1,9 +1,11 @@
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 const { fetch } = require('./bot.js');
+const { getGuildSettings } = require('./db.js');
+const default_prefix = "wt!";
 async function custom_prefix(message) {
     if (message.author.bot || !message.guild) return;
-    const prefix = default_prefix;
-    if (!message.content.startsWith(prefix)) return;
+    const prefix = getGuildSettings(message.guild.id).prefix || default_prefix;
+    if (!message.content.startsWith(prefix) || !message.content.startsWith(prefix.toUpperCase())) return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
