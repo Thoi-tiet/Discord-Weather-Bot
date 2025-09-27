@@ -244,11 +244,14 @@ client.on('guildCreate', async guild => {
         const row = new ActionRowBuilder()
             .addComponents(btn, donate_btn, buymeacoffee_btn);
 
-        await owner.send({ embeds: [embed], components: [row] });
+        const msg = await owner.send({ embeds: [embed], components: [row] });
+        const id = msg.id;
         setTimeout(async () => {
             const disabledRow = new ActionRowBuilder()
                 .addComponents(btn.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-            await owner.send({ components: [disabledRow] });
+            const channel = msg.channel;
+            const messageToEdit = await channel.messages.fetch(id);
+            await messageToEdit.edit({ components: [disabledRow] });
         }, 60000); // 1 phút
         console.log(`✅ Đã gửi DM cảm ơn tới owner của ${guild.name}`);
     } catch (err) {
@@ -606,7 +609,7 @@ client.on(Events.InteractionCreate, async interaction => {
 client.login(TOKEN);
 module.exports = {
     client, EmbedBuilder, OWM_API_KEY, CLIENT_ID, TOKEN, fetch,
-    Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, 
-    PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, 
+    Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder,
+    PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction,
     ActionRowBuilder
 };
