@@ -1,6 +1,10 @@
 const {
-    OWM_API_KEY, fetch
+    OWM_API_KEY
 } = require('../../bot.js');
+
+// functions.js
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
 
 const {
     buildFloodEmbed, buildAirPollutionEmbed, buildSatelliteRadiationEmbed,

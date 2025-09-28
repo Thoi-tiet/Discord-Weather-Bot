@@ -1,7 +1,9 @@
 const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
+// functions.js
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
 const {
     getAirPollutionData, getElevation, fetchWeatherDataByCoords, getWeatherIconByCoords,
     getWeatherIcon, fetchWeatherData, getIPInfo, getFloodRisk, getSatelliteRadiation,
