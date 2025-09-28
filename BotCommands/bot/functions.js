@@ -3,6 +3,7 @@ const {
 } = require('../../bot.js');
 
 const { fetchWithFallback } = require('../utils/api_key.js');
+const fetch = global.fetch || ((...args) => import('node-fetch').then(({default: f}) => f(...args)));
 
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)).catch(err => {throw err;});;
