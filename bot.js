@@ -68,6 +68,42 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.deferReply({ flags: 64 });
         }
 
+        if (commandName === 'vote') {
+            // await interaction.deferReply();
+            // Thêm link bot trên top.gg và nút nhấn để vote
+            const voteEmbed = new EmbedBuilder()
+                .setColor(0x00AE86)
+                .setTitle('🌟 Vote cho Thời tiết#6014 trên top.gg!')
+                .setDescription('Nếu bạn thích bot, hãy dành một chút thời gian để vote cho bot trên top.gg. Điều này giúp bot phát triển và tiếp cận nhiều người hơn!')
+                // .setURL('https://top.gg/bot/1403622819648110664/vote')
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+            const voteButton = new ButtonBuilder()
+                .setLabel('Vote trên top.gg')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://top.gg/bot/1403622819648110664/vote')
+                .setEmoji('⭐');
+            const donate_btn = new ButtonBuilder()
+                .setLabel('Ủng hộ qua Patreon')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.patreon.com/randomperson255')
+                .setEmoji('💖');
+            const buymeacoffee_btn = new ButtonBuilder()
+                .setLabel('Mời mình một ly cà phê')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.buymeacoffee.com/random.person.255')
+                .setEmoji('☕');
+            const row = new ActionRowBuilder()
+                .addComponents(voteButton, donate_btn, buymeacoffee_btn);
+            await interaction.editReply({ embeds: [voteEmbed], components: [row] });
+            // nếu đợi lâu quá thì disable nút
+            setTimeout(async () => {
+                const disabledRow = new ActionRowBuilder()
+                    .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+                await interaction.editReply({ components: [disabledRow] });
+            }, 60000); // 1 phút
+            return;
+        }
+
         if (commandName === 'help') {
             return await interaction.reply({
                 embeds: [
@@ -92,7 +128,7 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/ip info', value: 'Xem thông tin địa chỉ IP', inline: true },
                             { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true }
                         )
-                ]
+                ], ephemeral: true
             });
         }
 
