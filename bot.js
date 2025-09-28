@@ -1,6 +1,8 @@
 const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
+const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
+
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -271,5 +273,5 @@ client.on(Events.InteractionCreate, async interaction => {
 client.login(TOKEN);
 
 module.exports = {
-    client, OWM_API_KEY, CLIENT_ID, TOKEN, fetch
+    client, OWM_API_KEY, CLIENT_ID, TOKEN, fetch, apiKeys
 };

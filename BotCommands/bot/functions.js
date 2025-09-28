@@ -2,8 +2,10 @@ const {
     OWM_API_KEY
 } = require('../../bot.js');
 
+const { fetchWithFallback } = require('../utils/api_key.js');
+
 // functions.js
-// const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)).catch(err => {throw err;});;
 
 require('node-fetch');
 const {
@@ -12,7 +14,7 @@ const {
 } = require('./build_embed.js');
 async function getIPInfo(ip) {
     try {
-        const res = await fetch("https://api.country.is/" + ip);
+        const res = await fetch("https://api.country.is/" + ip).catch(err => { throw err; });;
         const data = res.json();
         if (data.error) {
             return { error: true, content: `❌ Không tìm thấy thông tin cho địa chỉ IP **${ip}**` };
@@ -27,7 +29,7 @@ async function getIPInfo(ip) {
 async function getFloodRisk(lat, lon) {
     console.log(`Đang lấy thông tin nguy cơ ngập lụt cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://flood-api.open-meteo.com/v1/flood?latitude=${lat}&longitude=${lon}&daily=river_discharge,river_discharge_mean,river_discharge_median,river_discharge_max,river_discharge_min,river_discharge_p25,river_discharge_p75&timezone=Asia%2FBangkok`);
+        const res = await fetch(`https://flood-api.open-meteo.com/v1/flood?latitude=${lat}&longitude=${lon}&daily=river_discharge,river_discharge_mean,river_discharge_median,river_discharge_max,river_discharge_min,river_discharge_p25,river_discharge_p75&timezone=Asia%2FBangkok`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu ngập lụt cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildFloodEmbed(data) };
@@ -39,7 +41,7 @@ async function getFloodRisk(lat, lon) {
 async function getSatelliteRadiation(lat, lon) {
     console.log(`Đang lấy thông tin bức xạ vệ tinh cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://satellite-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset,daylight_duration,sunshine_duration,shortwave_radiation_sum&models=satellite_radiation_seamless&timezone=Asia%2FBangkok`)
+        const res = await fetch(`https://satellite-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset,daylight_duration,sunshine_duration,shortwave_radiation_sum&models=satellite_radiation_seamless&timezone=Asia%2FBangkok`).catch(err => { throw err; });
         const data = await res.json();
         if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu bức xạ vệ tinh cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildSatelliteRadiationEmbed(data) };
@@ -51,7 +53,7 @@ async function getSatelliteRadiation(lat, lon) {
 async function fetchWeatherData(location) {
     console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod);
@@ -67,7 +69,7 @@ async function fetchWeatherData(location) {
 async function getWeatherIcon(location) {
     console.log(`Đang lấy biểu tượng thời tiết cho ${location}...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
@@ -83,7 +85,7 @@ async function getWeatherIcon(location) {
 async function getWeatherIconByCoords(lat, lon) {
     console.log(`Đang lấy biểu tượng thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
@@ -99,7 +101,7 @@ async function getWeatherIconByCoords(lat, lon) {
 async function fetchWeatherDataByCoords(lat, lon) {
     console.log(`Đang lấy thông tin thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
@@ -114,7 +116,7 @@ async function fetchWeatherDataByCoords(lat, lon) {
 async function getElevation(lat, lon) {
     console.log(`Đang lấy thông tin độ cao cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+        const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.elevation === undefined) return { error: true, content: `❌ Không tìm thấy dữ liệu độ cao cho tọa độ (${lat}, ${lon})` };
         return { error: false, content: `Độ cao ở (${lat}, ${lon}): ${data.elevation} m` };
@@ -127,7 +129,7 @@ async function getElevation(lat, lon) {
 async function fetchForecastByCoords(lat, lon, hours) {
     console.log(`Đang lấy thông tin dự báo thời tiết tại vị trí (${lat}, ${lon}) trong ${hours} giờ tới...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildForecastEmbed(data, hours, `(${lat}, ${lon}) - ${data.city.name}, ${data.city.country}`) };
@@ -140,7 +142,7 @@ async function fetchForecastByCoords(lat, lon, hours) {
 async function fetchForecast(location, hours) {
     console.log(`Đang lấy thông tin dự báo thời tiết cho ${location} trong ${hours} giờ tới...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${OWM_API_KEY}&units=metric&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho **${location}**` };
         return { error: false, embed: buildForecastEmbed(data, hours, `${data.city.name}, ${data.city.country}`) };
@@ -153,7 +155,7 @@ async function fetchForecast(location, hours) {
 async function getAirPollutionData(lat, lon) {
     console.log(`Đang lấy thông tin ô nhiễm không khí cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&lang=vi`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&lang=vi`).catch(err => { throw err; });;
         const data = await res.json();
         //if (data.cod !== 200) {
         console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
