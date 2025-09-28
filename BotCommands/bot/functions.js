@@ -14,7 +14,8 @@ async function getIPInfo(ip) {
             return { error: true, content: `❌ Không tìm thấy thông tin cho địa chỉ IP **${ip}**` };
         }
         return { error: false, content: "Địa chỉ IP: " + ip + "\nQuốc gia: " + data.country };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: "❌ Lỗi khi lấy thông tin địa chỉ IP." };
     }
 }
@@ -26,7 +27,8 @@ async function getFloodRisk(lat, lon) {
         const data = await res.json();
         if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu ngập lụt cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildFloodEmbed(data) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối Flood API.' };
     }
 }
@@ -37,7 +39,8 @@ async function getSatelliteRadiation(lat, lon) {
         const data = await res.json();
         if (data.error) return { error: true, content: `❌ Không tìm thấy dữ liệu bức xạ vệ tinh cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildSatelliteRadiationEmbed(data) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối Satellite API.' };
     }
 }
@@ -48,7 +51,8 @@ async function fetchWeatherData(location) {
         const data = await res.json();
         if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
         return { error: false, embed: buildWeatherEmbed(data) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -61,7 +65,8 @@ async function getWeatherIcon(location) {
         if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
         const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
         return { error: false, iconUrl };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -74,7 +79,8 @@ async function getWeatherIconByCoords(lat, lon) {
         if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
         const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
         return { error: false, iconUrl };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -86,7 +92,8 @@ async function fetchWeatherDataByCoords(lat, lon) {
         const data = await res.json();
         if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildWeatherEmbed(data) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -98,7 +105,8 @@ async function getElevation(lat, lon) {
         const data = await res.json();
         if (data.elevation === undefined) return { error: true, content: `❌ Không tìm thấy dữ liệu độ cao cho tọa độ (${lat}, ${lon})` };
         return { error: false, content: `Độ cao ở (${lat}, ${lon}): ${data.elevation} m` };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối Open-Meteo.' };
     }
 }
@@ -110,7 +118,8 @@ async function fetchForecastByCoords(lat, lon, hours) {
         const data = await res.json();
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildForecastEmbed(data, hours, `(${lat}, ${lon}) - ${data.city.name}, ${data.city.country}`) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -122,7 +131,8 @@ async function fetchForecast(location, hours) {
         const data = await res.json();
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho **${location}**` };
         return { error: false, embed: buildForecastEmbed(data, hours, `${data.city.name}, ${data.city.country}`) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }
@@ -134,7 +144,8 @@ async function getAirPollutionData(lat, lon) {
         const data = await res.json();
         //if (data.cod !== 200) return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
         return { error: false, embed: buildAirPollutionEmbed(data) };
-    } catch {
+    } catch (err){
+        console.log(err);
         return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
     }
 }

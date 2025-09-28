@@ -159,7 +159,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL('https://www.patreon.com/randomperson255').setEmoji('💖');
             const buymeacoffee_btn = new ButtonBuilder().setLabel('Mời mình một ly cà phê').setStyle(ButtonStyle.Link).setURL('https://www.buymeacoffee.com/random.person.255').setEmoji('☕');
 
-            const donateEmbed = new EmbedBuilder().setColor(0xffcc70).setTitle(`☕ Ủng hộ ${client.user.username}`).setDescription('Ủng hộ để duy trì và phát triển 💖')
+            const donateEmbed = new EmbedBuilder().setColor(0xffcc70).setTitle(`☕ Ủng hộ ${client.user.username}#6014`).setDescription('Ủng hộ để duy trì và phát triển 💖')
                 .addFields(
                     { name: 'Patreon', value: '[Ủng hộ Patreon](https://www.patreon.com/randomperson255)', inline: true },
                     { name: 'BuyMeACoffee', value: '[☕ BuyMeACoffee](https://www.buymeacoffee.com/random.person.255)', inline: true }
