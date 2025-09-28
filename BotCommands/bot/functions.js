@@ -1,6 +1,11 @@
-require('../../bot.js');
+const {
+    OWM_API_KEY, fetch
+} = require('../../bot.js');
 
-require('./build_embed.js');
+const {
+    buildFloodEmbed, buildAirPollutionEmbed, buildSatelliteRadiationEmbed,
+    buildWeatherEmbed, buildForecastEmbed
+} = require('./build_embed.js');
 async function getIPInfo(ip) {
     try {
         const res = await fetch("https://api.country.is/" + ip);
@@ -61,7 +66,7 @@ async function getWeatherIcon(location) {
     }
 }
 
-async function getWeatherIconByCoords(lon, lat) {
+async function getWeatherIconByCoords(lat, lon) {
     console.log(`Đang lấy biểu tượng thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=vi`);

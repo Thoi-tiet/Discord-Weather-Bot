@@ -1,4 +1,5 @@
-require('../../bot.js');
+const { EmbedBuilder } = require('discord.js');
+
 // build embed
 function buildFloodEmbed(data) {
     const time = data.daily.time[0];
