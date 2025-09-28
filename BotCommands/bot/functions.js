@@ -3,9 +3,9 @@ const {
 } = require('../../bot.js');
 
 // functions.js
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-
+require('node-fetch');
 const {
     buildFloodEmbed, buildAirPollutionEmbed, buildSatelliteRadiationEmbed,
     buildWeatherEmbed, buildForecastEmbed
