@@ -54,8 +54,8 @@ async function getSatelliteRadiation(lat, lon) {
 async function fetchWeatherData(location) {
     console.log(`Đang lấy thông tin thời tiết cho ${location}...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod);
             return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
@@ -70,8 +70,8 @@ async function fetchWeatherData(location) {
 async function getWeatherIcon(location) {
     console.log(`Đang lấy biểu tượng thời tiết cho ${location}...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
         }
@@ -86,8 +86,8 @@ async function getWeatherIcon(location) {
 async function getWeatherIconByCoords(lat, lon) {
     console.log(`Đang lấy biểu tượng thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
         }
@@ -102,8 +102,8 @@ async function getWeatherIconByCoords(lat, lon) {
 async function fetchWeatherDataByCoords(lat, lon) {
     console.log(`Đang lấy thông tin thời tiết cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== 200) {
             console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
         }
@@ -130,8 +130,8 @@ async function getElevation(lat, lon) {
 async function fetchForecastByCoords(lat, lon, hours) {
     console.log(`Đang lấy thông tin dự báo thời tiết tại vị trí (${lat}, ${lon}) trong ${hours} giờ tới...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho tọa độ (${lat}, ${lon})` };
         return { error: false, embed: buildForecastEmbed(data, hours, `(${lat}, ${lon}) - ${data.city.name}, ${data.city.country}`) };
     } catch (err) {
@@ -143,8 +143,8 @@ async function fetchForecastByCoords(lat, lon, hours) {
 async function fetchForecast(location, hours) {
     console.log(`Đang lấy thông tin dự báo thời tiết cho ${location} trong ${hours} giờ tới...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
+        
         if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho **${location}**` };
         return { error: false, embed: buildForecastEmbed(data, hours, `${data.city.name}, ${data.city.country}`) };
     } catch (err) {
@@ -156,8 +156,8 @@ async function fetchForecast(location, hours) {
 async function getAirPollutionData(lat, lon) {
     console.log(`Đang lấy thông tin ô nhiễm không khí cho tọa độ (${lat}, ${lon})...`);
     try {
-        const res = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}&lang=vi`);
-        const data = await res.json();
+        const data = await fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}&lang=vi`);
+        
         //if (data.cod !== 200) {
         console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu ô nhiễm không khí cho tọa độ **(${lat}, ${lon})**` };
         return { error: false, embed: buildAirPollutionEmbed(data) };
