@@ -6,7 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 require('./keepalive.js');
 require('./voting.js');
 const { setGuildPrefix } = require('./db.js');
-const { custom_prefix } = require('./custom_prefix.js');
+// const { custom_prefix } = require('./custom_prefix.js');
 
 const client = new Client({
     intents: [
@@ -168,7 +168,7 @@ const commands = [
         .setDescription("Xem thông tin địa chỉ IP")
         .addSubcommand(sub =>
             sub
-                .setName("info")
+                .setName("lookup")
                 .setDescription("Xem thông tin địa chỉ IP")
                 .addStringOption(option =>
                     option.setName('address').setDescription('Địa chỉ IP').setRequired(true)
@@ -177,14 +177,14 @@ const commands = [
     new SlashCommandBuilder()
         .setName("vote")
         .setDescription("Bỏ phiếu cho bot trên top.gg"),
-    new SlashCommandBuilder()
-        .setName("setprefix")
-        .setDescription("Đặt tiền tố tùy chỉnh cho server này (chỉ dành cho quản trị viên)")
-        .addStringOption(option =>
-            option.setName('prefix').setDescription('Tiền tố mới (1-10 ký tự)').setRequired(true)
-                .setMinLength(1)
-                .setMaxLength(10)
-        )
+    // new SlashCommandBuilder()
+    //     .setName("setprefix")
+    //     .setDescription("Đặt tiền tố tùy chỉnh cho server này (chỉ dành cho quản trị viên)")
+    //     .addStringOption(option =>
+    //         option.setName('prefix').setDescription('Tiền tố mới (1-10 ký tự)').setRequired(true)
+    //             .setMinLength(1)
+    //             .setMaxLength(10)
+    //     )
 ].map(cmd => cmd.toJSON());
 // require('./deploy-cmds.js');
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -267,7 +267,7 @@ client.on('messageCreate', async message => {
 Mình luôn ở đây để giúp bạn với các thông tin thời tiết và cũng như đưa bạn đến với những trải nghiệm tốt nhất!`);
         return;
     }
-    await custom_prefix(message);
+    // await custom_prefix(message);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -310,21 +310,21 @@ client.on(Events.InteractionCreate, async interaction => {
         return;
     }
 
-    if (commandName === 'setprefix') {
-        await interaction.deferReply();
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return interaction.editReply('❌ Bạn cần có quyền Quản trị viên để sử dụng lệnh này.');
-        }
+    // if (commandName === 'setprefix') {
+    //     await interaction.deferReply();
+    //     if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+    //         return interaction.editReply('❌ Bạn cần có quyền Quản trị viên để sử dụng lệnh này.');
+    //     }
 
-        const newPrefix = options.getString('prefix');
-        // Cập nhật tiền tố trong cơ sở dữ liệu
-        await setGuildPrefix(interaction.guild.id, newPrefix);
-        await interaction.editReply(`✅ Đã cập nhật tiền tố thành \`${newPrefix}\``);
-        return;
-    }
+    //     const newPrefix = options.getString('prefix');
+    //     // Cập nhật tiền tố trong cơ sở dữ liệu
+    //     await setGuildPrefix(interaction.guild.id, newPrefix);
+    //     await interaction.editReply(`✅ Đã cập nhật tiền tố thành \`${newPrefix}\``);
+    //     return;
+    // }
 
     if (commandName === 'weather_icon') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const location = options.getString('location').trim();
         const iconResult = await getWeatherIcon(location);
         if (iconResult.error) {
@@ -335,7 +335,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'weather_icon_coord') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const iconResult = await getWeatherIconByCoords(lat, lon);
@@ -347,7 +347,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'satellite_radiation') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const res = await getSatelliteRadiation(lat, lon);
@@ -359,7 +359,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'weather') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const location = options.getString('location').trim();
         const result = await fetchWeatherData(location);
         await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
@@ -368,8 +368,8 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (commandName === 'ip') {
         const sub = interaction.options.getSubcommand();
-        if (sub === "info") {
-            await interaction.deferReply();
+        if (sub === "lookup") {
+            await interaction.deferReply({ flags: 64 });
             const ip = options.getString('address');
             const res = await getIPInfo(ip);
             await interaction.editReply(res.content);
@@ -378,7 +378,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'weather_coord') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const result = await fetchWeatherDataByCoords(lat, lon);
@@ -387,7 +387,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'forecast') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const location = options.getString('location').trim();
         let hours = options.getInteger('hours') ?? 3; // mặc định 3 giờ
         if (hours <= 0 || hours > 120) {
@@ -399,7 +399,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'forecast_coord') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         let hours = options.getInteger('hours') ?? 3; // mặc định 3 giờ
@@ -470,7 +470,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 
     if (commandName === 'elevation') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const res = await getElevation(lat, lon);
@@ -479,7 +479,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'flood') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
         const res = await getFloodRisk(lat, lon);
@@ -523,7 +523,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (commandName === 'air_pollution') {
-        await interaction.deferReply();
+        await interaction.deferReply({ flags: 64 });
 
         const lat = options.getNumber('latitude');
         const lon = options.getNumber('longitude');
@@ -550,7 +550,7 @@ client.on(Events.InteractionCreate, async interaction => {
         if (sub === "location_to_coords") {
             const query = interaction.options.getString("location");
 
-            await interaction.deferReply();
+            await interaction.deferReply({ flags: 64 });
             try {
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
                 const res = await fetch(url, {
@@ -580,7 +580,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const lat = interaction.options.getNumber("lat");
             const lon = interaction.options.getNumber("lon");
 
-            await interaction.deferReply();
+            await interaction.deferReply({ flags: 64 });
             try {
                 const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
                 const res = await fetch(url, {
