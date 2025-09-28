@@ -1,4 +1,6 @@
-const { apiKeys } = require('./../../bot.js');
+const apiKeys = process.env.OWM_API_KEYS
+    ? process.env.OWM_API_KEYS.split(",").map(k => k.trim()).filter(Boolean)
+    : [];
 let currentKeyIndex = 0;
 
 async function fetchWithFallback(urlBuilder) {
