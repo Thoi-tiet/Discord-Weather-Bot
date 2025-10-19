@@ -33,7 +33,7 @@ const commands = [
     new SlashCommandBuilder().setName('weather_coord').setDescription('Xem thời tiết hiện tại theo tọa độ').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName('forecast').setDescription('Xem dự báo thời tiết').addStringOption(opt => opt.setName('location').setDescription('Tên thành phố').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '5 giờ', value: 5 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
     new SlashCommandBuilder().setName('forecast_coord').setDescription('Xem dự báo thời tiết theo tọa độ').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '6 giờ', value: 6 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
-    new SlashCommandBuilder().setName('help').setDescription('Hiển thị thông tin trợ giúp'),
+    new SlashCommandBuilder().setName('help').setDescription('Hiển thị thông tin trợ giúp').addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
     new SlashCommandBuilder().setName('air_pollution').setDescription('Xem thông tin ô nhiễm không khí').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("geo").setDescription("Chuyển đổi giữa địa điểm và tọa độ")
         .addSubcommand(sub => sub.setName("location_to_coords").setDescription("Chuyển từ địa điểm sang tọa độ").addStringOption(option => option.setName("location").setDescription("Nhập tên địa điểm").setRequired(true)))
@@ -44,8 +44,7 @@ const commands = [
     new SlashCommandBuilder().setName('satellite_radiation').setDescription('Xem dữ liệu bức xạ vệ tinh (satellite radiation)').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName('elevation').setDescription('Xem độ cao so với mực nước biển').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("flood").setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)").addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName("ip").setDescription("Xem thông tin địa chỉ IP").addSubcommand(sub => sub.setName("lookup").setDescription("Xem thông tin địa chỉ IP").addStringOption(option => option.setName('address').setDescription('Địa chỉ IP').setRequired(true))),
-    new SlashCommandBuilder().setName("vote").setDescription("Bỏ phiếu cho bot trên top.gg"),
+    new SlashCommandBuilder().setName("vote").setDescription("Bỏ phiếu cho bot trên top.gg").addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -68,11 +67,15 @@ client.on(Events.InteractionCreate, async interaction => {
     const { commandName, options } = interaction;
 
     try {
-        if (commandName !== 'help' && !interaction.deferred && !interaction.replied) {
+        if (commandName !== 'help' && commandName !== 'vote' && !interaction.deferred && !interaction.replied) {
             await interaction.deferReply({ flags: 64 });
         }
 
         if (commandName === 'vote') {
+            const show = options.getBoolean('show') ?? true;
+            if (show === false) {
+                await interaction.deferReply({ ephemeral: true });
+            }
             // await interaction.deferReply();
             // Thêm link bot trên top.gg và nút nhấn để vote
             const voteEmbed = new EmbedBuilder()
@@ -80,7 +83,7 @@ client.on(Events.InteractionCreate, async interaction => {
                 .setTitle('🌟 Vote cho Thời tiết#6014 trên top.gg!')
                 .setDescription('Nếu bạn thích bot, hãy dành một chút thời gian để vote cho bot trên top.gg. Điều này giúp bot phát triển và tiếp cận nhiều người hơn!')
                 // .setURL('https://top.gg/bot/1403622819648110664/vote')
-                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' });
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by <@1372581695328620594> (@therealnhan)' });
             const voteButton = new ButtonBuilder()
                 .setLabel('Vote trên top.gg')
                 .setStyle(ButtonStyle.Link)
@@ -109,6 +112,10 @@ client.on(Events.InteractionCreate, async interaction => {
         }
 
         if (commandName === 'help') {
+            const show = options.getBoolean('show') ?? true;
+            if (show === false) {
+                await interaction.deferReply({ ephemeral: true });
+            }
             return await interaction.reply({
                 embeds: [
                     new EmbedBuilder()
@@ -129,7 +136,6 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
                             { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
                             { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
-                            { name: '/ip info', value: 'Xem thông tin địa chỉ IP', inline: true },
                             { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true }
                         )
                 ], ephemeral: true
@@ -186,14 +192,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
         }
 
-        if (commandName === 'ip') {
-            const sub = options.getSubcommand();
-            if (sub === "lookup") {
-                const ip = options.getString('address');
-                const res = await getIPInfo(ip);
-                return await interaction.editReply(res.content);
-            }
-        }
+        
 
         if (commandName === 'donate') {
             const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL('https://www.patreon.com/randomperson255').setEmoji('💖');
@@ -204,7 +203,7 @@ client.on(Events.InteractionCreate, async interaction => {
                     { name: 'Patreon', value: '[Ủng hộ Patreon](https://www.patreon.com/randomperson255)', inline: true },
                     { name: 'BuyMeACoffee', value: '[☕ BuyMeACoffee](https://www.buymeacoffee.com/random.person.255)', inline: true }
                 )
-                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by @random.person.255' }).setTimestamp();
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by <@1372581695328620594> (@therealnhan)' }).setTimestamp();
 
             const row = new ActionRowBuilder().addComponents(donate_btn, buymeacoffee_btn);
             await interaction.editReply({ embeds: [donateEmbed], components: [row] });
