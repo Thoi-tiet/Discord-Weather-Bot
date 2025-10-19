@@ -81,11 +81,53 @@ client.on(Events.MessageCreate, async msg => {
             const owner = await msg.guild.fetchOwner();
             try {
                 await owner.send(`⚠️ Mình không có đủ quyền trong server **${msg.guild.name}** để hoạt động đúng cách.\nVui lòng cấp cho mình các quyền sau: ${requiredPermissions.map(perm => `\`${PermissionsBitField.Flags[perm]}\``).join(', ')}.`);
+                console.log(`Thiếu quyền: ${requiredPermissions.map(perm => `\`${PermissionsBitField.Flags[perm]}\``).join(', ')}`);
             } catch (error) {
                 console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
             }
         }
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
+    }
+});
+
+client.on(Events.GuildCreate, async guild => {
+    // Khi bot được thêm vào server mới, gửi DM cho owner
+    try {
+        const owner = await guild.fetchOwner();
+        const guildCreate_embed = new EmbedBuilder()
+            .setColor(0x00AE86)
+            .setTitle(`👋 Cảm ơn bạn đã thêm ${client.user.username} vào server của bạn!`)
+            .setDescription(`Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!
+Nếu bạn thích bot, bạn có thể ủng hộ mình qua Patreon hoặc BuyMeACoffee để giúp bot phát triển hơn nữa!`)
+            .setFooter({ text: 'Dev by <@1372581695328620594> (@therealnhan)' })
+            .setTimestamp()
+        await owner.send({ embeds: [guildCreate_embed] });
+            const voteButton = new ButtonBuilder()
+                .setLabel('Vote trên top.gg')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://top.gg/bot/1403622819648110664/vote')
+                .setEmoji('⭐');
+            const donate_btn = new ButtonBuilder()
+                .setLabel('Ủng hộ qua Patreon')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.patreon.com/randomperson255')
+                .setEmoji('💖');
+            const buymeacoffee_btn = new ButtonBuilder()
+                .setLabel('Mời mình một ly cà phê')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://www.buymeacoffee.com/random.person.255')
+                .setEmoji('☕');
+            const row = new ActionRowBuilder()
+                .addComponents(voteButton, donate_btn, buymeacoffee_btn);
+            // nếu đợi lâu quá thì disable nút
+            setTimeout(async () => {
+                const disabledRow = new ActionRowBuilder()
+                    .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+                owner.edit({ embeds: [guildCreate_embed], components: [disabledRow] });
+            }, 60000); // 1 phút
+            owner.send({ embeds: [guildCreate_embed], components: [row] });
+    } catch (error) {
+        console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
     }
 });
 
@@ -147,7 +189,7 @@ client.on(Events.InteractionCreate, async interaction => {
             } else {
                 await interaction.deferReply();
             }
-            return await interaction.reply({
+            return await interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle('Trợ giúp')
