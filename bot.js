@@ -66,6 +66,25 @@ client.once('ready', () => {
 client.on(Events.MessageCreate, async msg => {
     if (msg.author.bot) return;
     if (msg.mentions.has(client.user)) {
+        // Check xem có những permissions cần thiết không: SEND_MESSAGES, SEND_MESSAGES_IN_THREADS, EMBED_LINKS, USE_EXTERNAL_EMOJIS, USE_SLASH_COMMANDS, READ_MESSAGE_HISTORY
+        const requiredPermissions = [
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.SendMessagesInThreads,
+            PermissionsBitField.Flags.EmbedLinks,
+            PermissionsBitField.Flags.UseExternalEmojis,
+            PermissionsBitField.Flags.UseApplicationCommands,
+            PermissionsBitField.Flags.ReadMessageHistory
+        ];
+        const botMember = await msg.guild.members.fetchMe();
+        if (!botMember.permissions.has(requiredPermissions)) {
+            // Nếu không có quyền, gửi DM cho chủ server nếu có thể
+            const owner = await msg.guild.fetchOwner();
+            try {
+                await owner.send(`⚠️ Mình không có đủ quyền trong server **${msg.guild.name}** để hoạt động đúng cách.\nVui lòng cấp cho mình các quyền sau: ${requiredPermissions.map(perm => `\`${PermissionsBitField.Flags[perm]}\``).join(', ')}.`);
+            } catch (error) {
+                console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
+            }
+        }
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
     }
 });
