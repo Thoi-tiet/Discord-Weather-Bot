@@ -62,6 +62,14 @@ client.once('ready', () => {
     });
 });
 
+// Kích hoạt khi có người ping bot @Thời tiết
+client.on(Events.MessageCreate, async msg => {
+    if (msg.author.bot) return;
+    if (msg.mentions.has(client.user)) {
+        return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
+    }
+});
+
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
@@ -75,6 +83,8 @@ client.on(Events.InteractionCreate, async interaction => {
             const show = options.getBoolean('show') ?? true;
             if (show === false) {
                 await interaction.deferReply({ ephemeral: true });
+            } else {
+                await interaction.deferReply();
             }
             // await interaction.deferReply();
             // Thêm link bot trên top.gg và nút nhấn để vote
@@ -115,6 +125,8 @@ client.on(Events.InteractionCreate, async interaction => {
             const show = options.getBoolean('show') ?? true;
             if (show === false) {
                 await interaction.deferReply({ ephemeral: true });
+            } else {
+                await interaction.deferReply();
             }
             return await interaction.reply({
                 embeds: [
