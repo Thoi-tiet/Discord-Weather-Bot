@@ -127,6 +127,21 @@ client.on(Events.MessageCreate, async (msg) => {
             return msg.reply(`🚫 **${member.user.tag}** đã bị ban.`);
         }
 
+        if (cmd === "unban") {
+            if (!msg.member.permissions.has("BanMembers")) {
+                return msg.reply("❌ Bạn không có quyền unban thành viên!");
+            }
+            const userId = args[0];
+            if (!userId) return msg.reply("⚠️ Vui lòng nhập ID người dùng cần unban!")
+            try {
+                await msg.guild.members.unban(userId);
+                return msg.channel.send(`✅ Đã gỡ ban cho người dùng **<@${userId}>**`);
+            } catch (err) {
+                console.error("Lỗi khi gỡ ban người dùng:", err);
+                return msg.reply("❌ Có lỗi xảy ra khi gỡ ban người dùng.");
+            }
+        }
+
         if (cmd === "kick") {
             if (!msg.member.permissions.has("KickMembers"))
                 return msg.reply("❌ Bạn không có quyền kick thành viên!");
@@ -145,9 +160,22 @@ client.on(Events.MessageCreate, async (msg) => {
             await member.timeout(duration * 1000, "Bị mute bởi bot.");
             return msg.reply(`🔇 **${member.user.tag}** đã bị mute trong ${duration} giây.`);
         }
-    } else {
-        // Ignore messages from non-owner servers
-        return;
+        if (cmd === "unmute") {
+            if (!msg.member.permissions.has("MuteMembers"))
+                return msg.reply("❌ Bạn không có quyền unmute thành viên!");
+            const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
+            if (!member) return msg.reply("⚠️ Vui lòng mention hoặc nhập ID thành viên cần unmute!");
+            try {
+                await member.timeout(null, "Được unmute bởi bot.");
+                return msg.channel.send(`🔊 **${member.user.tag}** đã được unmute.`);
+            } catch (err) {
+                console.error(err);
+                return msg.reply("❌ Có lỗi xảy ra khi unmute thành viên.");
+            }
+        } else {
+            // Ignore messages from non-owner servers
+            return;
+        }
     }
 });
 
