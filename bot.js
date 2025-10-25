@@ -15,7 +15,7 @@ require('./voting.js');
 const { setGuildPrefix } = require('./db.js');
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
-const prefix = "w!" || "W!";
+var prefix = "w!" || "W!";
 
 const client = new Client({
     intents: [
