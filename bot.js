@@ -86,6 +86,7 @@ client.on(Events.MessageCreate, async msg => {
                 console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
             }
         }
+        msg.react('<:01d:1416316694514634782>').catch(console.error);
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
     }
 });
