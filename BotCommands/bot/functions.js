@@ -7,8 +7,6 @@ const fetch = global.fetch || ((...args) => import('node-fetch').then(({default:
 
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)).catch(err => {throw err;});;
-
-require('node-fetch');
 const {
     buildFloodEmbed, buildAirPollutionEmbed, buildSatelliteRadiationEmbed,
     buildWeatherEmbed, buildForecastEmbed

@@ -15,6 +15,8 @@ require('./voting.js');
 const { setGuildPrefix } = require('./db.js');
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
+const prefix = "w!" || "W!";
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -92,49 +94,56 @@ client.on(Events.MessageCreate, async msg => {
 });
 
 client.on(Events.MessageCreate, async (msg) => {
-    if (!msg.guild || msg.author.bot) return;
+    if (!msg.guild || msg.author.bot || !msg.content.startsWith(prefix)) return;
     const isOwnerServer = OWNER_SERVERS.includes(msg.guild.id);
     if (isOwnerServer) {
         // Further moderation logic can be added here
-        const args = msg.content.trim().split(/ +/);
+        const args = msg.content.slice(prefix.length).trim().split(/ +/);
         const cmd = args.shift().toLowerCase();
 
-        if (cmd === "w!clear") {
+        if (cmd === "clear" || cmd === "delete" || cmd === "del") {
             if (!msg.member.permissions.has("ManageMessages"))
                 return msg.reply("❌ Bạn không có quyền xóa tin nhắn!");
             const count = parseInt(args[0]);
-            if (isNaN(count) || count < 1 || count > 100)
-                return msg.reply("⚠️ Hãy nhập số lượng tin nhắn (1–100).");
-            await msg.channel.bulkDelete(count + 1, true);
-            msg.reply(`🧹 Đã xóa ${count} tin nhắn.`).then(m => setTimeout(() => m.delete(), 3000));
+            if (isNaN(count) || count < 1 || count > 1000)
+                return msg.reply("⚠️ Hãy nhập số lượng tin nhắn (1–1000).");
+            try {
+                await msg.channel.bulkDelete(count + 1, true);
+                // xóa tin nhắn xong rồi mới log channel
+                const confirm = await msg.channel.send(`✅ Đã xóa ${count} tin nhắn.`);
+                setTimeout(() => confirm.delete().catch(() => { }), 5000);
+            } catch (error) {
+                console.error("Lỗi khi xóa tin nhắn:", error);
+                return msg.reply("❌ Có lỗi xảy ra khi xóa tin nhắn.");
+            }
         }
 
-        if (cmd === "w!ban") {
+        if (cmd === "ban") {
             if (!msg.member.permissions.has("BanMembers"))
                 return msg.reply("❌ Bạn không có quyền ban thành viên!");
             const member = msg.mentions.members.first();
             if (!member) return msg.reply("⚠️ Hãy mention người cần ban.");
             await member.ban({ reason: "Bị ban bởi bot." });
-            msg.reply(`🚫 ${member.user.tag} đã bị ban.`);
+            return msg.reply(`🚫 **${member.user.tag}** đã bị ban.`);
         }
 
-        if (cmd === "w!kick") {
+        if (cmd === "kick") {
             if (!msg.member.permissions.has("KickMembers"))
                 return msg.reply("❌ Bạn không có quyền kick thành viên!");
             const member = msg.mentions.members.first();
             if (!member) return msg.reply("⚠️ Hãy mention người cần kick.");
             await member.kick({ reason: "Bị kick bởi bot." });
-            msg.reply(`👢 ${member.user.tag} đã bị kick.`);
+            return msg.reply(`👢 **${member.user.tag}** đã bị kick.`);
         }
         // Mute command with duration can be added here
-        if (cmd === "w!mute") {
+        if (cmd === "mute") {
             if (!msg.member.permissions.has("MuteMembers"))
                 return msg.reply("❌ Bạn không có quyền mute thành viên!");
             const member = msg.mentions.members.first();
             if (!member) return msg.reply("⚠️ Hãy mention người cần mute.");
             const duration = parseInt(args[1]) || 10;
             await member.timeout(duration * 1000, "Bị mute bởi bot.");
-            msg.reply(`🔇 ${member.user.tag} đã bị mute trong ${duration} giây.`);
+            return msg.reply(`🔇 **${member.user.tag}** đã bị mute trong ${duration} giây.`);
         }
     } else {
         // Ignore messages from non-owner servers
@@ -154,30 +163,30 @@ Nếu bạn thích bot, bạn có thể ủng hộ mình qua Patreon hoặc BuyM
             .setFooter({ text: 'Dev by <@1372581695328620594> (@therealnhan)' })
             .setTimestamp()
         await owner.send({ embeds: [guildCreate_embed] });
-            const voteButton = new ButtonBuilder()
-                .setLabel('Vote trên top.gg')
-                .setStyle(ButtonStyle.Link)
-                .setURL('https://top.gg/bot/1403622819648110664/vote')
-                .setEmoji('⭐');
-            const donate_btn = new ButtonBuilder()
-                .setLabel('Ủng hộ qua Patreon')
-                .setStyle(ButtonStyle.Link)
-                .setURL('https://www.patreon.com/randomperson255')
-                .setEmoji('💖');
-            const buymeacoffee_btn = new ButtonBuilder()
-                .setLabel('Mời mình một ly cà phê')
-                .setStyle(ButtonStyle.Link)
-                .setURL('https://www.buymeacoffee.com/random.person.255')
-                .setEmoji('☕');
-            const row = new ActionRowBuilder()
-                .addComponents(voteButton, donate_btn, buymeacoffee_btn);
-            // nếu đợi lâu quá thì disable nút
-            setTimeout(async () => {
-                const disabledRow = new ActionRowBuilder()
-                    .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-                owner.edit({ embeds: [guildCreate_embed], components: [disabledRow] });
-            }, 60000); // 1 phút
-            owner.send({ embeds: [guildCreate_embed], components: [row] });
+        const voteButton = new ButtonBuilder()
+            .setLabel('Vote trên top.gg')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://top.gg/bot/1403622819648110664/vote')
+            .setEmoji('⭐');
+        const donate_btn = new ButtonBuilder()
+            .setLabel('Ủng hộ qua Patreon')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.patreon.com/randomperson255')
+            .setEmoji('💖');
+        const buymeacoffee_btn = new ButtonBuilder()
+            .setLabel('Mời mình một ly cà phê')
+            .setStyle(ButtonStyle.Link)
+            .setURL('https://www.buymeacoffee.com/random.person.255')
+            .setEmoji('☕');
+        const row = new ActionRowBuilder()
+            .addComponents(voteButton, donate_btn, buymeacoffee_btn);
+        // nếu đợi lâu quá thì disable nút
+        setTimeout(async () => {
+            const disabledRow = new ActionRowBuilder()
+                .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
+            owner.edit({ embeds: [guildCreate_embed], components: [disabledRow] });
+        }, 60000); // 1 phút
+        owner.send({ embeds: [guildCreate_embed], components: [row] });
     } catch (error) {
         console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
     }
@@ -317,7 +326,7 @@ client.on(Events.InteractionCreate, async interaction => {
             return await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
         }
 
-        
+
 
         if (commandName === 'donate') {
             const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL('https://www.patreon.com/randomperson255').setEmoji('💖');
