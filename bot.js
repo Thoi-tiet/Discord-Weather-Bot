@@ -13,7 +13,7 @@ const {
 require('./keepalive.js');
 require('./voting.js');
 const { setGuildPrefix } = require('./db.js');
-const { OWNER_SERVERS } = require('./BotCommands/utils/moderation.js');
+const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
 const client = new Client({
     intents: [
