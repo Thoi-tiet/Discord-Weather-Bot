@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
@@ -14,6 +13,7 @@ const {
 require('./keepalive.js');
 require('./voting.js');
 const { setGuildPrefix } = require('./db.js');
+const { OWNER_SERVERS } = require('./BotCommands/utils/moderation.js');
 
 const client = new Client({
     intents: [
@@ -87,6 +87,57 @@ client.on(Events.MessageCreate, async msg => {
             }
         }
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
+    }
+});
+
+client.on(Events.MessageCreate, async (msg) => {
+    if (!msg.guild || msg.author.bot) return;
+    const isOwnerServer = OWNER_SERVERS.includes(msg.guild.id);
+    if (isOwnerServer) {
+        // Further moderation logic can be added here
+        const args = msg.content.trim().split(/ +/);
+        const cmd = args.shift().toLowerCase();
+
+        if (cmd === "w!clear") {
+            if (!msg.member.permissions.has("ManageMessages"))
+                return msg.reply("❌ Bạn không có quyền xóa tin nhắn!");
+            const count = parseInt(args[0]);
+            if (isNaN(count) || count < 1 || count > 100)
+                return msg.reply("⚠️ Hãy nhập số lượng tin nhắn (1–100).");
+            await msg.channel.bulkDelete(count + 1, true);
+            msg.reply(`🧹 Đã xóa ${count} tin nhắn.`).then(m => setTimeout(() => m.delete(), 3000));
+        }
+
+        if (cmd === "w!ban") {
+            if (!msg.member.permissions.has("BanMembers"))
+                return msg.reply("❌ Bạn không có quyền ban thành viên!");
+            const member = msg.mentions.members.first();
+            if (!member) return msg.reply("⚠️ Hãy mention người cần ban.");
+            await member.ban({ reason: "Bị ban bởi bot." });
+            msg.reply(`🚫 ${member.user.tag} đã bị ban.`);
+        }
+
+        if (cmd === "w!kick") {
+            if (!msg.member.permissions.has("KickMembers"))
+                return msg.reply("❌ Bạn không có quyền kick thành viên!");
+            const member = msg.mentions.members.first();
+            if (!member) return msg.reply("⚠️ Hãy mention người cần kick.");
+            await member.kick({ reason: "Bị kick bởi bot." });
+            msg.reply(`👢 ${member.user.tag} đã bị kick.`);
+        }
+        // Mute command with duration can be added here
+        if (cmd === "w!mute") {
+            if (!msg.member.permissions.has("MuteMembers"))
+                return msg.reply("❌ Bạn không có quyền mute thành viên!");
+            const member = msg.mentions.members.first();
+            if (!member) return msg.reply("⚠️ Hãy mention người cần mute.");
+            const duration = parseInt(args[1]) || 10;
+            await member.timeout(duration * 1000, "Bị mute bởi bot.");
+            msg.reply(`🔇 ${member.user.tag} đã bị mute trong ${duration} giây.`);
+        }
+    } else {
+        // Ignore messages from non-owner servers
+        return;
     }
 });
 
