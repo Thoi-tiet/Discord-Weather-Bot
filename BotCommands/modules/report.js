@@ -75,7 +75,7 @@ module.exports = {
                 const description = interaction.fields.getTextInputValue("report_description");
                 const timestamp = new Date().toISOString();
 
-                db.run(
+                db.query(
                     `INSERT INTO reports (username, command, query, description, timestamp)
            VALUES (?, ?, ?, ?, ?)`,
                     [interaction.user.tag, command, query, description, timestamp],
