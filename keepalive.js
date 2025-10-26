@@ -43,6 +43,8 @@ app.get('/', (req, res) => {
         <h1>☁ Discord Thời tiết#6014 Bot Keepalive Server</h1>
         <div class="info">The bot is running and healthy 🚀</div>
         <button onclick="location.reload()">Refresh</button>
+        <a href="/status" style="color: white; text-decoration: none;"><button>Status</button></a>
+        <a href="/healthz" style="color: white; text-decoration: none;"><button>Health Check</button></a>
       </body>
     </html>
   `);
