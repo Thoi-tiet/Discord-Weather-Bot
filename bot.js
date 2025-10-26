@@ -269,7 +269,7 @@ client.on(Events.InteractionCreate, async interaction => {
                             timestamp: new Date(),
                         },
                     ],
-                });
+                ephemeral: !show });
                 return;
             } catch (err) {
                 console.error(err);
