@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
+const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
 
 // functions.js
@@ -47,6 +48,10 @@ const commands = [
     new SlashCommandBuilder().setName('elevation').setDescription('Xem độ cao so với mực nước biển').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("flood").setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)").addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("vote").setDescription("Bỏ phiếu cho bot trên top.gg").addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
+    new SlashCommandBuilder()
+        .setName("ping")
+        .setDescription("Kiểm tra độ trễ và tình trạng bot.")
+        .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false)),
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -225,8 +230,51 @@ client.on(Events.InteractionCreate, async interaction => {
     const { commandName, options } = interaction;
 
     try {
-        if (commandName !== 'help' && commandName !== 'vote' && !interaction.deferred && !interaction.replied) {
+        if (commandName !== 'help' && commandName !== 'vote' && commandName !== 'ping' && !interaction.deferred && !interaction.replied) {
             await interaction.deferReply({ flags: 64 });
+        }
+
+        if (commandName === "ping") {
+            const show = options.getBoolean('show') ?? true;
+            if (show === false) {
+                await interaction.deferReply({ ephemeral: true });
+            } else {
+                await interaction.deferReply();
+            }
+            try {
+                const sent = await interaction.editReply({ content: "🏓 Pong!", fetchReply: true });
+
+                const ping = sent.createdTimestamp - interaction.createdTimestamp;
+                const apiPing = Math.round(interaction.client.ws.ping);
+
+                const uptimeSeconds = Math.floor(process.uptime());
+                const uptimeMinutes = Math.floor(uptimeSeconds / 60);
+                const uptimeHours = Math.floor(uptimeMinutes / 60);
+
+                const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+                const cpuLoad = os.loadavg()[0].toFixed(2);
+
+                await interaction.followUp({
+                    embeds: [
+                        {
+                            title: "📊 Bot Statistics",
+                            color: 0x00ff99,
+                            fields: [
+                                { name: "🏓 Ping", value: `${ping}ms (API: ${apiPing}ms)`, inline: true },
+                                { name: "🕒 Uptime", value: `${uptimeHours}h ${uptimeMinutes % 60}m`, inline: true },
+                                { name: "💾 RAM", value: `${memUsage} MB`, inline: true },
+                                { name: "⚙️ CPU Load", value: `${cpuLoad}`, inline: true },
+                            ],
+                            footer: { text: `Yêu cầu bởi ${interaction.user.tag}` },
+                            timestamp: new Date(),
+                        },
+                    ],
+                });
+                return;
+            } catch (err) {
+                console.error(err);
+                return interaction.editReply({ content: "❌ Lỗi khi chạy lệnh /ping!", ephemeral: true });
+            }
         }
 
         if (commandName === 'vote') {
@@ -298,7 +346,8 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
                             { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
                             { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
-                            { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true }
+                            { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true },
+                            { name: '/ping', value: 'Kiểm tra độ trễ và tình trạng bot', inline: true },
                         )
                 ], ephemeral: true
             });
