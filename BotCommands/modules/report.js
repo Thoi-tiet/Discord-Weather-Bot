@@ -16,26 +16,19 @@ const db = new Pool({
     ssl: { rejectUnauthorized: false } // Render yêu cầu SSL
 });
 
-(async () => {
-    await db.query(`
-    CREATE TABLE IF NOT EXISTS reports (
-      id SERIAL PRIMARY KEY,
-      user TEXT,
-      command TEXT,
-      query TEXT,
-      description TEXT,
-      timestamp TEXT
-    )
-  `);
-    console.log("✅ [reportHandler] PostgreSQL sẵn sàng.");
-})();
 
-
-await db.query(
-    `INSERT INTO reports (user, command, query, description, timestamp)
-   VALUES ($1, $2, $3, $4, $5)`,
-    [interaction.user.tag, command, query, description, new Date().toISOString()]
-);
+db.query(`
+  CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    username TEXT,
+    command TEXT,
+    query TEXT,
+    description TEXT,
+    timestamp TEXT
+  );
+`)
+  .then(() => console.log("✅ [report] PostgreSQL ready."))
+  .catch(console.error);
 
 
 module.exports = {
@@ -83,7 +76,7 @@ module.exports = {
                 const timestamp = new Date().toISOString();
 
                 db.run(
-                    `INSERT INTO reports (user, command, query, description, timestamp)
+                    `INSERT INTO reports (username, command, query, description, timestamp)
            VALUES (?, ?, ?, ?, ?)`,
                     [interaction.user.tag, command, query, description, timestamp],
                     async (err) => {

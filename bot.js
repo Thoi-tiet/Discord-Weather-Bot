@@ -14,7 +14,7 @@ const {
 } = require('./BotCommands/bot/functions.js');
 require('./keepalive.js');
 require('./voting.js');
-const { setGuildPrefix } = require('./db.js');
+
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
 var prefix = "w!" || "W!";
