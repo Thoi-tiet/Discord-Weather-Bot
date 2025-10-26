@@ -77,8 +77,8 @@ module.exports = {
 
                 db.query(
                     `INSERT INTO reports (username, command, query, description, timestamp)
-           VALUES (?, ?, ?, ?, ?)`,
-                    [interaction.user.tag, command, query, description, timestamp],
+VALUES ($1, $2, $3, $4, $5)`,
+  [interaction.user.tag, command, query, description, timestamp],
                     async (err) => {
                         if (err) {
                             console.error("❌ Lỗi lưu report:", err);
