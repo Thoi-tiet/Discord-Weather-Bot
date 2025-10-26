@@ -23,7 +23,7 @@ function buildFloodEmbed(data) {
             { name: '💧 Lưu lượng dòng chảy phần trăm 25 (river discharge p25)', value: `${river_discharge_p25} m³/s`, inline: true },
             { name: '💧 Lưu lượng dòng chảy phần trăm 75 (river discharge p75)', value: `${river_discharge_p75} m³/s`, inline: true }
         )
-        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by @random.person.255' })
+        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by <@1372581695328620594> (@therealnhan)' })
         .setTimestamp();
 }
 function buildAirPollutionEmbed(data) {
@@ -47,7 +47,7 @@ function buildAirPollutionEmbed(data) {
             { name: '🌫 O3', value: `${data.list[0].components.o3} µg/m³`, inline: true },
             { name: '🌫 SO2', value: `${data.list[0].components.so2} µg/m³`, inline: true }
         )
-        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by @random.person.255' })
+        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by <@1372581695328620594> (@therealnhan)' })
         .setTimestamp();
 }
 
@@ -66,7 +66,7 @@ function buildSatelliteRadiationEmbed(data) {
             { name: '☀ Thời gian có nắng (sunshine duration)', value: `${data.daily.sunshine_duration[todayIndex] != null ? data.daily.sunshine_duration[todayIndex] : 0} giây`, inline: true },
             { name: '🌞 Tổng bức xạ sóng ngắn (shortwave radiation sum)', value: `${data.daily.shortwave_radiation_sum[todayIndex] != null ? data.daily.shortwave_radiation_sum[todayIndex] : 0} MJ/m²`, inline: true }
         )
-        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by @random.person.255' })
+        .setFooter({ text: 'Nguồn: Open-Meteo\nDev by <@1372581695328620594> (@therealnhan)' })
         .setTimestamp();
 }
 
@@ -98,7 +98,7 @@ function buildWeatherEmbed(data) {
             { name: '☁ Mây', value: `${data.clouds.all}%`, inline: true }
         )
         .setThumbnail(`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`)
-        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by @random.person.255' })
+        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by <@1372581695328620594> (@therealnhan)' })
         .setTimestamp();
 }
 
@@ -118,7 +118,7 @@ function buildForecastEmbed(data, hours, title) {
         .setTitle(`📅 Dự báo ${hours} giờ tới ở ${title}`)
         .setColor(0x3498db)
         .setThumbnail(`https://openweathermap.org/img/wn/${selected[0].weather[0].icon}@2x.png`)
-        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by @random.person.255' })
+        .setFooter({ text: 'Nguồn: OpenWeatherMap\nDev by <@1372581695328620594> (@therealnhan)' })
         .setTimestamp();
 
     let desc = '';
