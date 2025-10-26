@@ -349,7 +349,7 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true },
                             { name: '/ping', value: 'Kiểm tra độ trễ và tình trạng bot', inline: true },
                         )
-                ], ephemeral: true
+                ]
             });
         }
 
