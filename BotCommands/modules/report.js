@@ -27,8 +27,8 @@ db.query(`
     timestamp TEXT
   );
 `)
-  .then(() => console.log("✅ [report] PostgreSQL ready."))
-  .catch(console.error);
+    .then(() => console.log("✅ [report] PostgreSQL ready."))
+    .catch(console.error);
 
 
 module.exports = {
@@ -50,9 +50,12 @@ module.exports = {
                 const command = parts[2];
                 const query = decodeURIComponent(parts.slice(3).join("_"));
 
+                const shortQuery = query.length > 20 ? query.slice(0, 20) + "…" : query;
+
                 const modal = new ModalBuilder()
-                    .setCustomId(`report_modal_${command}_${query}`)
-                    .setTitle(`Báo sai thời tiết (${query})`);
+                    .setCustomId(`report_${command}_${shortQuery}`)
+                    .setTitle(`Báo sai thời tiết (${shortQuery})`);
+
 
                 const descInput = new TextInputBuilder()
                     .setCustomId("report_description")
@@ -78,7 +81,7 @@ module.exports = {
                 db.query(
                     `INSERT INTO reports (username, command, query, description, timestamp)
 VALUES ($1, $2, $3, $4, $5)`,
-  [interaction.user.tag, command, query, description, timestamp],
+                    [interaction.user.tag, command, query, description, timestamp],
                     async (err) => {
                         if (err) {
                             console.error("❌ Lỗi lưu report:", err);
