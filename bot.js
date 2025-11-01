@@ -105,6 +105,13 @@ client.on(Events.MessageCreate, async msg => {
 });
 
 client.on(Events.MessageCreate, async (msg) => {
+    // Tránh lặp lại tin nhắn trong vòng 1 giây
+    const recentMessages = new Set();
+    if (recentMessages.has(msg.content)) {
+        return;
+    }
+    recentMessages.add(msg.content);
+    setTimeout(() => recentMessages.delete(msg.content), 1000);
     let lwrcase_msg = msg.content.toLowerCase();
     if (!msg.guild || msg.author.bot || !lwrcase_msg.startsWith(prefix)) return;
     const isOwnerServer = OWNER_SERVERS.includes(msg.guild.id);
