@@ -138,7 +138,7 @@ client.on(Events.MessageCreate, async (msg) => {
         if (cmd === "ban") {
             if (!msg.member.permissions.has("BanMembers"))
                 return msg.reply("❌ Bạn không có quyền ban thành viên!");
-            const member = msg.mentions.members.first();
+            const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
             if (!member) return msg.reply("⚠️ Hãy mention người cần ban.");
             await member.ban({ reason: "Bị ban bởi bot." });
             return msg.reply(`🚫 **${member.user.tag}** đã bị ban.`);
@@ -162,7 +162,7 @@ client.on(Events.MessageCreate, async (msg) => {
         if (cmd === "kick") {
             if (!msg.member.permissions.has("KickMembers"))
                 return msg.reply("❌ Bạn không có quyền kick thành viên!");
-            const member = msg.mentions.members.first();
+            const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
             if (!member) return msg.reply("⚠️ Hãy mention người cần kick.");
             await member.kick({ reason: "Bị kick bởi bot." });
             return msg.reply(`👢 **${member.user.tag}** đã bị kick.`);
@@ -171,7 +171,7 @@ client.on(Events.MessageCreate, async (msg) => {
         if (cmd === "mute") {
             if (!msg.member.permissions.has("MuteMembers"))
                 return msg.reply("❌ Bạn không có quyền mute thành viên!");
-            const member = msg.mentions.members.first();
+            const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
             if (!member) return msg.reply("⚠️ Hãy mention người cần mute.");
             const duration = parseInt(args[1]) || 10;
             await member.timeout(duration * 1000, "Bị mute bởi bot.");
