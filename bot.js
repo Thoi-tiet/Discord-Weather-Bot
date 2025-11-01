@@ -1,9 +1,12 @@
+const fs = require('fs');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
 const { createReportButton, attach: attachReportHandler } = require("./BotCommands/modules/report.js");
-
+// Open the config.json file
+const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji } = require('./config.json');
+// const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -13,7 +16,7 @@ const {
     fetchForecastByCoords, fetchForecast
 } = require('./BotCommands/bot/functions.js');
 require('./keepalive.js');
-require('./voting.js');
+require('./BotCommands/utils/voting.js');
 
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
@@ -96,7 +99,7 @@ client.on(Events.MessageCreate, async msg => {
                 console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
             }
         }
-        msg.react('<:01d:1416316694514634782>').catch(console.error);
+        msg.react(react_emoji).catch(console.error);
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
     }
 });
@@ -202,17 +205,17 @@ Nếu bạn thích bot, bạn có thể ủng hộ mình qua Patreon hoặc BuyM
         const voteButton = new ButtonBuilder()
             .setLabel('Vote trên top.gg')
             .setStyle(ButtonStyle.Link)
-            .setURL('https://top.gg/bot/1403622819648110664/vote')
+            .setURL(`https://top.gg/bot/${topgg_botid}/vote`)
             .setEmoji('⭐');
         const donate_btn = new ButtonBuilder()
             .setLabel('Ủng hộ qua Patreon')
             .setStyle(ButtonStyle.Link)
-            .setURL('https://www.patreon.com/randomperson255')
+            .setURL(`https://www.patreon.com/${patreon_id}`)
             .setEmoji('💖');
         const buymeacoffee_btn = new ButtonBuilder()
             .setLabel('Mời mình một ly cà phê')
             .setStyle(ButtonStyle.Link)
-            .setURL('https://www.buymeacoffee.com/random.person.255')
+            .setURL(`https://www.buymeacoffee.com/${buymeacoffee_id}`)
             .setEmoji('☕');
         const row = new ActionRowBuilder()
             .addComponents(voteButton, donate_btn, buymeacoffee_btn);
@@ -293,22 +296,22 @@ client.on(Events.InteractionCreate, async interaction => {
                 .setColor(0x00AE86)
                 .setTitle('🌟 Vote cho Thời tiết#6014 trên top.gg!')
                 .setDescription('Nếu bạn thích bot, hãy dành một chút thời gian để vote cho bot trên top.gg. Điều này giúp bot phát triển và tiếp cận nhiều người hơn!')
-                // .setURL('https://top.gg/bot/1403622819648110664/vote')
-                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by <@1372581695328620594> (@therealnhan)' });
+                // .setURL(`https://top.gg/bot/${topgg_botid}/vote`)
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!' });
             const voteButton = new ButtonBuilder()
                 .setLabel('Vote trên top.gg')
                 .setStyle(ButtonStyle.Link)
-                .setURL('https://top.gg/bot/1403622819648110664/vote')
+                .setURL(`https://top.gg/bot/${topgg_botid}/vote`)
                 .setEmoji('⭐');
             const donate_btn = new ButtonBuilder()
                 .setLabel('Ủng hộ qua Patreon')
                 .setStyle(ButtonStyle.Link)
-                .setURL('https://www.patreon.com/randomperson255')
+                .setURL(`https://www.patreon.com/${patreon_id}`)
                 .setEmoji('💖');
             const buymeacoffee_btn = new ButtonBuilder()
                 .setLabel('Mời mình một ly cà phê')
                 .setStyle(ButtonStyle.Link)
-                .setURL('https://www.buymeacoffee.com/random.person.255')
+                .setURL(`https://www.buymeacoffee.com/${buymeacoffee_id}`)
                 .setEmoji('☕');
             const row = new ActionRowBuilder()
                 .addComponents(voteButton, donate_btn, buymeacoffee_btn);
@@ -414,15 +417,15 @@ client.on(Events.InteractionCreate, async interaction => {
 
 
         if (commandName === 'donate') {
-            const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL('https://www.patreon.com/randomperson255').setEmoji('💖');
-            const buymeacoffee_btn = new ButtonBuilder().setLabel('Mời mình một ly cà phê').setStyle(ButtonStyle.Link).setURL('https://www.buymeacoffee.com/random.person.255').setEmoji('☕');
+            const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL(`https://www.patreon.com/${patreon_id}`).setEmoji('💖');
+            const buymeacoffee_btn = new ButtonBuilder().setLabel('Mời mình một ly cà phê').setStyle(ButtonStyle.Link).setURL(`https://www.buymeacoffee.com/${buymeacoffee_id}`).setEmoji('☕');
 
             const donateEmbed = new EmbedBuilder().setColor(0xffcc70).setTitle(`☕ Ủng hộ ${client.user.username}#6014`).setDescription('Ủng hộ để duy trì và phát triển 💖')
                 .addFields(
-                    { name: 'Patreon', value: '[Ủng hộ Patreon](https://www.patreon.com/randomperson255)', inline: true },
-                    { name: 'BuyMeACoffee', value: '[☕ BuyMeACoffee](https://www.buymeacoffee.com/random.person.255)', inline: true }
+                    { name: 'Patreon', value: `[Ủng hộ Patreon](https://www.patreon.com/${patreon_id})`, inline: true },
+                    { name: 'BuyMeACoffee', value: `[☕ BuyMeACoffee](https://www.buymeacoffee.com/${buymeacoffee_id})`, inline: true }
                 )
-                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!\nDev by <@1372581695328620594> (@therealnhan)' }).setTimestamp();
+                .setFooter({ text: 'Cảm ơn bạn đã ủng hộ!' }).setTimestamp();
 
             const row = new ActionRowBuilder().addComponents(donate_btn, buymeacoffee_btn);
             await interaction.editReply({ embeds: [donateEmbed], components: [row] });
