@@ -16,6 +16,9 @@ const db = new Pool({
     ssl: { rejectUnauthorized: false } // Render yêu cầu SSL
 });
 
+db.connect()
+    .then(() => console.log("✅ [report] PostgreSQL connected."))
+    .catch(console.error);
 
 db.query(`
   CREATE TABLE IF NOT EXISTS reports (
