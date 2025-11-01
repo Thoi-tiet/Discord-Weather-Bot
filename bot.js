@@ -75,9 +75,18 @@ client.once('ready', () => {
     });
 });
 
-// Kích hoạt khi có người ping bot @Thời tiết
-client.on(Events.MessageCreate, async msg => {
-    if (msg.author.bot) return;
+
+
+client.on(Events.MessageCreate, async (msg) => {
+    // Tránh lặp lại tin nhắn trong vòng 1 giây
+    const recentMessages = new Set();
+    if (recentMessages.has(msg.content)) {
+        return;
+    }
+    recentMessages.add(msg.content);
+    setTimeout(() => recentMessages.delete(msg.content), 1000);
+    let lwrcase_msg = msg.content.toLowerCase();
+    // Kích hoạt khi có người ping bot @Thời tiết
     if (msg.mentions.has(client.user)) {
         // Check xem có những permissions cần thiết không: SEND_MESSAGES, SEND_MESSAGES_IN_THREADS, EMBED_LINKS, USE_EXTERNAL_EMOJIS, USE_SLASH_COMMANDS, READ_MESSAGE_HISTORY
         const requiredPermissions = [
@@ -102,17 +111,6 @@ client.on(Events.MessageCreate, async msg => {
         msg.react(react_emoji).catch(console.error);
         return msg.reply(`👋 Chào bạn **${msg.author.username}**! Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!`);
     }
-});
-
-client.on(Events.MessageCreate, async (msg) => {
-    // Tránh lặp lại tin nhắn trong vòng 1 giây
-    const recentMessages = new Set();
-    if (recentMessages.has(msg.content)) {
-        return;
-    }
-    recentMessages.add(msg.content);
-    setTimeout(() => recentMessages.delete(msg.content), 1000);
-    let lwrcase_msg = msg.content.toLowerCase();
     if (!msg.guild || msg.author.bot || !lwrcase_msg.startsWith(prefix)) return;
     const isOwnerServer = OWNER_SERVERS.includes(msg.guild.id);
     if (isOwnerServer) {
@@ -130,7 +128,7 @@ client.on(Events.MessageCreate, async (msg) => {
                 await msg.channel.bulkDelete(count + 1, true);
                 // xóa tin nhắn xong rồi mới log channel
                 const confirm = await msg.channel.send(`✅ Đã xóa ${count} tin nhắn.`);
-                setTimeout(() => confirm.delete().catch(() => { }), 5000);
+                // setTimeout(() => confirm.delete().catch(() => { }), 5000);
             } catch (error) {
                 console.error("Lỗi khi xóa tin nhắn:", error);
                 return msg.reply("❌ Có lỗi xảy ra khi xóa tin nhắn.");
