@@ -5,7 +5,7 @@ const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
 const { createReportButton, attach: attachReportHandler } = require("./BotCommands/modules/report.js");
 // Open the config.json file
-const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji } = require('./config.json');
+const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix } = require('./config.json');
 // const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -20,7 +20,7 @@ require('./BotCommands/utils/voting.js');
 
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
-var prefix = "w!" || "W!";
+// var prefix = "w!";
 
 const client = new Client({
     intents: [
@@ -105,11 +105,12 @@ client.on(Events.MessageCreate, async msg => {
 });
 
 client.on(Events.MessageCreate, async (msg) => {
-    if (!msg.guild || msg.author.bot || !msg.content.startsWith(prefix)) return;
+    let lwrcase_msg = msg.content.toLowerCase();
+    if (!msg.guild || msg.author.bot || !lwrcase_msg.startsWith(prefix)) return;
     const isOwnerServer = OWNER_SERVERS.includes(msg.guild.id);
     if (isOwnerServer) {
         // Further moderation logic can be added here
-        const args = msg.content.slice(prefix.length).trim().split(/ +/);
+        const args = lwrcase_msg.slice(prefix.length).trim().split(/ +/);
         const cmd = args.shift().toLowerCase();
 
         if (cmd === "clear" || cmd === "delete" || cmd === "del") {
