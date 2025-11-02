@@ -4,6 +4,8 @@ const {
     PermissionsBitField
 } = require("discord.js");
 
+const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix } = require('./../../config.json');
+
 const OWNER_SERVERS = process.env.OWNER_SERVERS.split(",").map(id => id.trim());
 
 
@@ -73,7 +75,7 @@ module.exports = {
                     const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
                     if (!member) return msg.reply("⚠️ Hãy mention người cần ban.");
                     await member.ban({ reason: "Bị ban bởi bot." });
-                    return msg.reply(`🚫 **${member.user.tag}** đã bị ban.`);
+                    return msg.channel.send(`🚫 **${member.user.tag}** đã bị ban.`);
                 }
 
                 if (cmd === "unban") {
@@ -97,7 +99,7 @@ module.exports = {
                     const member = msg.mentions.members.first() || msg.guild.members.cache.get(args[0]);
                     if (!member) return msg.reply("⚠️ Hãy mention người cần kick.");
                     await member.kick({ reason: "Bị kick bởi bot." });
-                    return msg.reply(`👢 **${member.user.tag}** đã bị kick.`);
+                    return msg.channel.send(`👢 **${member.user.tag}** đã bị kick.`);
                 }
                 // Mute command with duration can be added here
                 if (cmd === "mute") {
@@ -107,7 +109,7 @@ module.exports = {
                     if (!member) return msg.reply("⚠️ Hãy mention người cần mute.");
                     const duration = parseInt(args[1]) || 10;
                     await member.timeout(duration * 1000, "Bị mute bởi bot.");
-                    return msg.reply(`🔇 **${member.user.tag}** đã bị mute trong ${duration} giây.`);
+                    return msg.channel.send(`🔇 **${member.user.tag}** đã bị mute trong ${duration} giây.`);
                 }
                 if (cmd === "unmute") {
                     if (!msg.member.permissions.has("MuteMembers"))

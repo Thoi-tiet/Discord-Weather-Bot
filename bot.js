@@ -10,15 +10,11 @@ const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix } = requir
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const {
-    getAirPollutionData, getElevation, fetchWeatherDataByCoords, getWeatherIconByCoords,
-    getWeatherIcon, fetchWeatherData, getIPInfo, getFloodRisk, getSatelliteRadiation,
-    fetchForecastByCoords, fetchForecast
-} = require('./BotCommands/bot/functions.js');
-require('./keepalive.js');
+require('./BotCommands/keepalive.js');
 require('./BotCommands/utils/voting.js');
 
-
+const { WeatherFunctions } = require('./BotCommands/bot/functions.js');
+const func = new WeatherFunctions();
 // var prefix = "w!";
 
 const client = new Client({
@@ -74,51 +70,15 @@ client.once('ready', () => {
     });
 });
 
-
+client.once('error', err => {
+    console.error('Lỗi client:\n', err);
+})
 
 require('./BotCommands/modules/moderation.js').execute(client);
 
-client.on(Events.GuildCreate, async guild => {
-    // Khi bot được thêm vào server mới, gửi DM cho owner
-    try {
-        const owner = await guild.fetchOwner();
-        const guildCreate_embed = new EmbedBuilder()
-            .setColor(0x00AE86)
-            .setTitle(`👋 Cảm ơn bạn đã thêm ${client.user.username} vào server của bạn!`)
-            .setDescription(`Sử dụng lệnh \`/help\` để xem danh sách các lệnh của mình nhé!
-Nếu bạn thích bot, bạn có thể ủng hộ mình qua Patreon hoặc BuyMeACoffee để giúp bot phát triển hơn nữa!`)
-            .setFooter({ text: 'Dev by <@1372581695328620594> (@therealnhan)' })
-            .setTimestamp()
-        await owner.send({ embeds: [guildCreate_embed] });
-        const voteButton = new ButtonBuilder()
-            .setLabel('Vote trên top.gg')
-            .setStyle(ButtonStyle.Link)
-            .setURL(`https://top.gg/bot/${topgg_botid}/vote`)
-            .setEmoji('⭐');
-        const donate_btn = new ButtonBuilder()
-            .setLabel('Ủng hộ qua Patreon')
-            .setStyle(ButtonStyle.Link)
-            .setURL(`https://www.patreon.com/${patreon_id}`)
-            .setEmoji('💖');
-        const buymeacoffee_btn = new ButtonBuilder()
-            .setLabel('Mời mình một ly cà phê')
-            .setStyle(ButtonStyle.Link)
-            .setURL(`https://www.buymeacoffee.com/${buymeacoffee_id}`)
-            .setEmoji('☕');
-        const row = new ActionRowBuilder()
-            .addComponents(voteButton, donate_btn, buymeacoffee_btn);
-        // nếu đợi lâu quá thì disable nút
-        setTimeout(async () => {
-            const disabledRow = new ActionRowBuilder()
-                .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-            owner.edit({ embeds: [guildCreate_embed], components: [disabledRow] });
-        }, 60000); // 1 phút
-        owner.send({ embeds: [guildCreate_embed], components: [row] });
-    } catch (error) {
-        console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);
-    }
-});
+require('./BotCommands/guilds/guildCreate.js').guild_create(client);
 
+// Main part (handling commands)
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
     const { commandName, options } = interaction;
@@ -249,7 +209,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
         if (commandName === 'weather') {
             const location = options.getString('location').trim();
-            const result = await fetchWeatherData(location);
+            const result = await func.fetchWeatherData(location);
             const row = createReportButton(commandName, encodeURIComponent(location));
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
@@ -257,7 +217,7 @@ client.on(Events.InteractionCreate, async interaction => {
         if (commandName === 'weather_coord') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const result = await fetchWeatherDataByCoords(lat, lon);
+            const result = await func.fetchWeatherDataByCoords(lat, lon);
             const row = createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
@@ -266,9 +226,9 @@ client.on(Events.InteractionCreate, async interaction => {
             const location = options.getString('location').trim();
             let hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
-            const result = await fetchForecast(location, hours);
-            const row = createReportButton(commandName, encodeURIComponent(location));
-            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
+            const result = await func.fetchForecast(location, hours);
+            // const row = createReportButton(commandName, encodeURIComponent(location));
+            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
         }
 
         if (commandName === 'forecast_coord') {
@@ -276,28 +236,28 @@ client.on(Events.InteractionCreate, async interaction => {
             const lon = options.getNumber('longitude');
             let hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
-            const result = await fetchForecastByCoords(lat, lon, hours);
-            const row = createReportButton(commandName, `${lat},${lon}`);
-            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
+            const result = await func.fetchForecastByCoords(lat, lon, hours);
+            // const row = createReportButton(commandName, `${lat},${lon}`);
+            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
         }
 
         if (commandName === 'weather_icon') {
             const location = options.getString('location').trim();
-            const iconResult = await getWeatherIcon(location);
+            const iconResult = await func.getWeatherIcon(location);
             return await interaction.editReply(iconResult.error ? iconResult.content : { files: [iconResult.iconUrl] });
         }
 
         if (commandName === 'weather_icon_coord') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const iconResult = await getWeatherIconByCoords(lat, lon);
+            const iconResult = await func.getWeatherIconByCoords(lat, lon);
             return await interaction.editReply(iconResult.error ? iconResult.content : { files: [iconResult.iconUrl] });
         }
 
         if (commandName === 'satellite_radiation') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const res = await getSatelliteRadiation(lat, lon);
+            const res = await func.getSatelliteRadiation(lat, lon);
             const row = createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(res.error ? res.content : { embeds: [res.embed], components: [row] });
         }
@@ -332,23 +292,21 @@ client.on(Events.InteractionCreate, async interaction => {
         if (commandName === 'elevation') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const res = await getElevation(lat, lon);
-            const row = createReportButton(commandName, `${lat},${lon}`);
-            return await interaction.editReply({content: res.content, components: [row]});
+            const res = await func.getElevation(lat, lon);
+            return await interaction.editReply({content: res.content});
         }
 
         if (commandName === 'flood') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const res = await getFloodRisk(lat, lon);
-            const row = createReportButton(commandName, `${lat},${lon}`);
-            return await interaction.editReply(res.error ? res.content : { embeds: [res.embed], components: [row] });
+            const res = await func.getFloodRisk(lat, lon);
+            return await interaction.editReply(res.error ? res.content : { embeds: [res.embed] });
         }
 
         if (commandName === 'air_pollution') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            const result = await getAirPollutionData(lat, lon);
+            const result = await func.getAirPollutionData(lat, lon);
             const row = createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
