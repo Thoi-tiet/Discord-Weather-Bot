@@ -55,7 +55,8 @@ app.get('/status', (req, res) => {
   res.status(200).json({
     status: 'ok', timestamp: new Date().toISOString(),
     uptime: process.uptime(), memoryUsage: process.memoryUsage(), platform: process.platform, nodeVersion: process.version,
-    cpuUsage: process.cpuUsage(), loadAverage: require('os').loadavg()
+    cpuUsage: process.cpuUsage(), loadAverage: require('os').loadavg(), totalMemory: require('os').totalmem(), freeMemory: require('os').freemem(),
+    machine: require('os').machine(), cpus: require('os').cpus()
   });
 });
 

@@ -3,7 +3,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, Em
 require('dotenv').config();
 const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
-const { createReportButton, attach: attachReportHandler } = require("./BotCommands/modules/report.js");
+const { WeatherReport } = require("./BotCommands/modules/report.js");
 // Open the config.json file
 const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix } = require('./config.json');
 // const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
@@ -26,7 +26,9 @@ const client = new Client({
     ]
 });
 
-attachReportHandler(client, null);
+const report = new WeatherReport();
+const attachWeatherReport = report.attach.bind(report);
+attachWeatherReport(client, null);
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -210,7 +212,7 @@ client.on(Events.InteractionCreate, async interaction => {
         if (commandName === 'weather') {
             const location = options.getString('location').trim();
             const result = await func.fetchWeatherData(location);
-            const row = createReportButton(commandName, encodeURIComponent(location));
+            const row = report.createReportButton(commandName, encodeURIComponent(location));
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
 
@@ -218,7 +220,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
             const result = await func.fetchWeatherDataByCoords(lat, lon);
-            const row = createReportButton(commandName, `${lat},${lon}`);
+            const row = report.createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
 
@@ -227,7 +229,7 @@ client.on(Events.InteractionCreate, async interaction => {
             let hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
             const result = await func.fetchForecast(location, hours);
-            // const row = createReportButton(commandName, encodeURIComponent(location));
+            // const row = report.createReportButton(commandName, encodeURIComponent(location));
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
         }
 
@@ -237,7 +239,7 @@ client.on(Events.InteractionCreate, async interaction => {
             let hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
             const result = await func.fetchForecastByCoords(lat, lon, hours);
-            // const row = createReportButton(commandName, `${lat},${lon}`);
+            // const row = report.createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
         }
 
@@ -258,7 +260,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
             const res = await func.getSatelliteRadiation(lat, lon);
-            const row = createReportButton(commandName, `${lat},${lon}`);
+            const row = report.createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(res.error ? res.content : { embeds: [res.embed], components: [row] });
         }
 
@@ -307,7 +309,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
             const result = await func.getAirPollutionData(lat, lon);
-            const row = createReportButton(commandName, `${lat},${lon}`);
+            const row = report.createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed], components: [row] });
         }
 

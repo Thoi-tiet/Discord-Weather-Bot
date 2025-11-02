@@ -33,8 +33,9 @@ db.query(`
     .then(() => console.log("✅ [report] PostgreSQL ready."))
     .catch(console.error);
 
+class WeatherReport {
+    constructor() { }
 
-module.exports = {
     // 🧱 Tạo nút báo cáo
     createReportButton(command, query) {
         const button = new ButtonBuilder()
@@ -42,7 +43,7 @@ module.exports = {
             .setLabel("📢 Báo sai thời tiết")
             .setStyle(ButtonStyle.Danger);
         return new ActionRowBuilder().addComponents(button);
-    },
+    }
 
     // ⚙️ Gắn listener xử lý vào client
     attach(client, adminChannelId = null) {
@@ -118,4 +119,7 @@ VALUES ($1, $2, $3, $4, $5)`,
             }
         });
     }
+}
+module.exports = {
+    WeatherReport
 };

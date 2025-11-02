@@ -2,7 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 class WeatherEmbed {
     constructor() { }
 
-    // build embed
+    // build embeds
     buildFloodEmbed(data) {
         const time = data.daily.time[0];
         const river_discharge = data.daily.river_discharge[0];
