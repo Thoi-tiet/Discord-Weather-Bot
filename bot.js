@@ -109,6 +109,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
                 const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
                 const cpuLoad = os.loadavg()[0].toFixed(2);
+                const totalCPUs = os.cpus().length;
+                const cpuUsage = (cpuLoad / totalCPUs * 100).toFixed(2);
+                const totalMemory = (process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2);
 
                 await interaction.followUp({
                     embeds: [
@@ -120,6 +123,8 @@ client.on(Events.InteractionCreate, async interaction => {
                                 { name: "🕒 Uptime", value: `${uptimeHours}h ${uptimeMinutes % 60}m`, inline: true },
                                 { name: "💾 RAM", value: `${memUsage} MB`, inline: true },
                                 { name: "⚙️ CPU Load", value: `${cpuLoad}`, inline: true },
+                                { name: "🖥️ CPU Usage", value: `${cpuUsage}%`, inline: true },
+                                { name: "🗄️ Total Memory", value: `${totalMemory} MB`, inline: true },
                             ],
                             footer: { text: `Yêu cầu bởi ${interaction.user.tag}` },
                             timestamp: new Date(),
