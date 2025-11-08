@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder, InteractionContextType } = require('discord.js');
 require('dotenv').config();
 const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
@@ -35,25 +35,25 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
 const commands = [
-    new SlashCommandBuilder().setName('weather').setDescription('Xem thời tiết hiện tại bằng tên thành phố').addStringOption(opt => opt.setName('location').setDescription('Tên thành phố').setRequired(true)),
-    new SlashCommandBuilder().setName('weather_coord').setDescription('Xem thời tiết hiện tại theo tọa độ').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName('forecast').setDescription('Xem dự báo thời tiết').addStringOption(opt => opt.setName('location').setDescription('Tên thành phố').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '5 giờ', value: 5 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
-    new SlashCommandBuilder().setName('forecast_coord').setDescription('Xem dự báo thời tiết theo tọa độ').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '6 giờ', value: 6 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
-    new SlashCommandBuilder().setName('help').setDescription('Hiển thị thông tin trợ giúp').addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
-    new SlashCommandBuilder().setName('air_pollution').setDescription('Xem thông tin ô nhiễm không khí').addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName('weather').setDescription('Xem thời tiết hiện tại bằng tên thành phố').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addStringOption(opt => opt.setName('location').setDescription('Tên thành phố').setRequired(true)),
+    new SlashCommandBuilder().setName('weather_coord').setDescription('Xem thời tiết hiện tại theo tọa độ').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName('forecast').setDescription('Xem dự báo thời tiết').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addStringOption(opt => opt.setName('location').setDescription('Tên thành phố').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '5 giờ', value: 5 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
+    new SlashCommandBuilder().setName('forecast_coord').setDescription('Xem dự báo thời tiết theo tọa độ').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)).addIntegerOption(opt => opt.setName('hours').setDescription('Số giờ muốn xem dự báo (mặc định: 3 giờ)').addChoices({ name: '3 giờ', value: 3 }, { name: '6 giờ', value: 6 }, { name: '12 giờ', value: 12 }, { name: '24 giờ', value: 24 })),
+    new SlashCommandBuilder().setName('help').setDescription('Hiển thị thông tin trợ giúp').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
+    new SlashCommandBuilder().setName('air_pollution').setDescription('Xem thông tin ô nhiễm không khí').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(opt => opt.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(opt => opt.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("geo").setDescription("Chuyển đổi giữa địa điểm và tọa độ")
         .addSubcommand(sub => sub.setName("location_to_coords").setDescription("Chuyển từ địa điểm sang tọa độ").addStringOption(option => option.setName("location").setDescription("Nhập tên địa điểm").setRequired(true)))
         .addSubcommand(sub => sub.setName("coords_to_location").setDescription("Chuyển từ tọa độ sang địa điểm").addNumberOption(option => option.setName("lat").setDescription("Nhập vĩ độ").setRequired(true)).addNumberOption(option => option.setName("lon").setDescription("Nhập kinh độ").setRequired(true))),
     new SlashCommandBuilder().setName('donate').setDescription('Ủng hộ để phát triển bot'),
-    new SlashCommandBuilder().setName('weather_icon').setDescription('Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)').addStringOption(option => option.setName('location').setDescription('Tên địa điểm').setRequired(true)),
-    new SlashCommandBuilder().setName('weather_icon_coord').setDescription('Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName('satellite_radiation').setDescription('Xem dữ liệu bức xạ vệ tinh (satellite radiation)').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName('elevation').setDescription('Xem độ cao so với mực nước biển').addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName("flood").setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)").addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
-    new SlashCommandBuilder().setName("vote").setDescription("Bỏ phiếu cho bot trên top.gg").addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
+    new SlashCommandBuilder().setName('weather_icon').setDescription('Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addStringOption(option => option.setName('location').setDescription('Tên địa điểm').setRequired(true)),
+    new SlashCommandBuilder().setName('weather_icon_coord').setDescription('Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName('satellite_radiation').setDescription('Xem dữ liệu bức xạ vệ tinh (satellite radiation)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName('elevation').setDescription('Xem độ cao so với mực nước biển').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName("flood").setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)").setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
+    new SlashCommandBuilder().setName("vote").setDescription("Bỏ phiếu cho bot trên top.gg").setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addBooleanOption(opt => opt.setName('show').setDescription('Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)').setRequired(false)),
     new SlashCommandBuilder()
         .setName("ping")
-        .setDescription("Kiểm tra độ trễ và tình trạng bot.")
+        .setDescription("Kiểm tra độ trễ và tình trạng bot.").setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM])
         .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false)),
 ].map(cmd => cmd.toJSON());
 
@@ -125,7 +125,8 @@ client.on(Events.InteractionCreate, async interaction => {
                             timestamp: new Date(),
                         },
                     ],
-                ephemeral: !show });
+                    ephemeral: !show
+                });
                 return;
             } catch (err) {
                 console.error(err);
@@ -295,7 +296,7 @@ client.on(Events.InteractionCreate, async interaction => {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
             const res = await func.getElevation(lat, lon);
-            return await interaction.editReply({content: res.content});
+            return await interaction.editReply({ content: res.content });
         }
 
         if (commandName === 'flood') {
