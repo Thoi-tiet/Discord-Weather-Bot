@@ -55,6 +55,10 @@ const commands = [
         .setName("ping")
         .setDescription("Kiểm tra độ trễ và tình trạng bot.").setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM])
         .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false)),
+    new SlashCommandBuilder()
+        .setName("about")
+        .setDescription("Xem thông tin về bot")
+        .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false))
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -213,6 +217,29 @@ client.on(Events.InteractionCreate, async interaction => {
                         )
                 ]
             });
+        }
+
+        if (commandName === 'about') {
+            const show = options.getBoolean('show') ?? true;
+            if (show === false) {
+                await interaction.deferReply({ ephemeral: true });
+            } else {
+                await interaction.deferReply();
+            }
+            const embed = new EmbedBuilder()
+                .setTitle('Giới thiệu')
+                .setThumbnail(client.user.avatarURL())
+                .setColor(0x00AE86)
+                .setDescription('Bot thời tiết cung cấp thông tin thời tiết hiện tại và dự báo cho các địa điểm trên toàn thế giới.\nĐược lập trình bởi <@1372581695328620594> (random person).');
+            const btn_row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setLabel('GitHub')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL('https://github.com/Thoi-tiet/Discord-Weather-Bot')
+                    .setEmoji('💻'),
+            )
+
+            return await interaction.editReply({ embeds: [embed], components: [btn_row] });
         }
 
         if (commandName === 'weather') {
