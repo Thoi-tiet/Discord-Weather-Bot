@@ -16,7 +16,8 @@ const db = new Pool({
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD, // important for production, keep this in .env and not hardcoded
-    connectionString: process.env.DATABASE_URL,
+    // connectionString: process.env.DATABASE_URL,
+    port: process.env.DB_PORT || 5432,
     ssl: { rejectUnauthorized: false } // for secure connection to managed databases, adjust as needed
 });
 
