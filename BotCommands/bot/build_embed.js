@@ -25,7 +25,7 @@ class WeatherEmbed {
                 { name: '💧 Lưu lượng dòng chảy phần trăm 25 (river discharge p25)', value: `${river_discharge_p25} m³/s`, inline: true },
                 { name: '💧 Lưu lượng dòng chảy phần trăm 75 (river discharge p75)', value: `${river_discharge_p75} m³/s`, inline: true }
             )
-            .setFooter({ text: 'Nguồn: Open-Meteo' })
+            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
             .setTimestamp();
     }
     buildAirPollutionEmbed(data) {
@@ -49,7 +49,7 @@ class WeatherEmbed {
                 { name: '🌫 O3', value: `${data.list[0].components.o3} µg/m³`, inline: true },
                 { name: '🌫 SO2', value: `${data.list[0].components.so2} µg/m³`, inline: true }
             )
-            .setFooter({ text: 'Nguồn: OpenWeatherMap' })
+            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
             .setTimestamp();
     }
 
@@ -68,7 +68,7 @@ class WeatherEmbed {
                 { name: '☀ Thời gian có nắng (sunshine duration)', value: `${data.daily.sunshine_duration[todayIndex] != null ? data.daily.sunshine_duration[todayIndex] : 0} giây`, inline: true },
                 { name: '🌞 Tổng bức xạ sóng ngắn (shortwave radiation sum)', value: `${data.daily.shortwave_radiation_sum[todayIndex] != null ? data.daily.shortwave_radiation_sum[todayIndex] : 0} MJ/m²`, inline: true }
             )
-            .setFooter({ text: 'Nguồn: Open-Meteo' })
+            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
             .setTimestamp();
     }
 
@@ -100,7 +100,7 @@ class WeatherEmbed {
                 { name: '☁ Mây', value: `${data.clouds.all}%`, inline: true }
             )
             .setThumbnail(`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`)
-            .setFooter({ text: 'Nguồn: OpenWeatherMap' })
+            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
             .setTimestamp();
     }
 
@@ -120,7 +120,7 @@ class WeatherEmbed {
             .setTitle(`📅 Dự báo ${hours} giờ tới ở ${title}`)
             .setColor(0x3498db)
             .setThumbnail(`https://openweathermap.org/img/wn/${selected[0].weather[0].icon}@2x.png`)
-            .setFooter({ text: 'Nguồn: OpenWeatherMap' })
+            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
             .setTimestamp();
 
         let desc = '';

@@ -6,6 +6,7 @@ const {
     ButtonStyle,
     ActionRowBuilder
 } = require("discord.js");
+const { topgg_botid, buymeacoffee_id, patreon_id } = require('./../../config.json');
 
 module.exports = {
     guild_create(client) {
