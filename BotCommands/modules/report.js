@@ -9,7 +9,9 @@ const {
     Events
 } = require("discord.js");
 const { Pool } = require("pg");
+// const { client } = require('../../bot.js');
 require("dotenv").config();
+const { admin_id } = require('./../../config.json');
 
 const db = new Pool({
     user: process.env.DB_USER,
@@ -62,7 +64,7 @@ class WeatherReport {
                 const shortQuery = query.length > 20 ? query.slice(0, 20) + "…" : query;
 
                 const modal = new ModalBuilder()
-                    .setCustomId(`report_${command}_${shortQuery}`)
+                    .setCustomId(`report_modal_${command}_${shortQuery}`)
                     .setTitle(`Báo sai thời tiết (${shortQuery})`);
 
 
@@ -80,7 +82,7 @@ class WeatherReport {
             }
 
             // --- Khi người dùng gửi form ---
-            else if (interaction.isModalSubmit() && interaction.customId.startsWith("report_modal_")) {
+            if (interaction.isModalSubmit() && interaction.customId.startsWith("report_modal_")) {
                 const parts = interaction.customId.split("_");
                 const command = parts[2];
                 const query = decodeURIComponent(parts.slice(3).join("_"));
@@ -102,8 +104,8 @@ VALUES ($1, $2, $3, $4, $5)`,
                             ephemeral: true,
                         });
 
-                        // --- Gửi về channel admin nếu có ---
-                        if (adminChannelId) {
+                        var admin = await client.users.fetch(admin_id).catch(() => null); // fetch admin user by ID, handle error if not found
+                        if (admin) {
                             const embed = new EmbedBuilder()
                                 .setColor(0xff5555)
                                 .setTitle("📢 Báo cáo sai dữ liệu thời tiết")
