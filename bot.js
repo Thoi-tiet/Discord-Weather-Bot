@@ -5,7 +5,7 @@ const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
 const { WeatherReport } = require("./BotCommands/modules/report.js");
 // Open the config.json file
-const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix } = require('./config.json');
+const { topgg_botid, buymeacoffee_id, patreon_id, react_emoji, prefix, admin_id } = require('./config.json');
 // const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 // functions.js
 // const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -28,7 +28,7 @@ const client = new Client({
 
 const report = new WeatherReport();
 const attachWeatherReport = report.attach.bind(report);
-attachWeatherReport(client, null);
+attachWeatherReport(client, client.users.fetch(admin_id).catch(() => null));
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;

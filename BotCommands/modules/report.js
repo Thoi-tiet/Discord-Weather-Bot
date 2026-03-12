@@ -53,7 +53,7 @@ class WeatherReport {
     }
 
     // ⚙️ Gắn listener xử lý vào client
-    attach(client, adminChannelId = null) {
+    attach(client, admin = null) {
         client.on(Events.InteractionCreate, async (interaction) => {
             // --- Khi người dùng bấm nút ---
             if (interaction.isButton() && interaction.customId.startsWith("report_weather_")) {
@@ -89,40 +89,37 @@ class WeatherReport {
                 const description = interaction.fields.getTextInputValue("report_description");
                 const timestamp = new Date().toISOString();
 
-                db.query(
-                    `INSERT INTO reports (username, command, query, description, timestamp)
+                try {
+                    await db.query(
+                        `INSERT INTO reports (username, command, query, description, timestamp)
 VALUES ($1, $2, $3, $4, $5)`,
-                    [interaction.user.tag, command, query, description, timestamp],
-                    async (err) => {
-                        if (err) {
-                            console.error("❌ Lỗi lưu report:", err);
-                            return interaction.reply({ content: "⚠️ Có lỗi khi lưu báo cáo!", ephemeral: true });
-                        }
+                        [interaction.user.tag, command, query, description, timestamp]
+                    );
 
-                        await interaction.reply({
-                            content: `✅ Cảm ơn **${interaction.user.username}**! Báo cáo về **${query}** đã được ghi nhận.`,
-                            ephemeral: true,
-                        });
+                    await interaction.reply({
+                        content: `✅ Cảm ơn **${interaction.user.username}**! Báo cáo về **${query}** đã được ghi nhận.`,
+                        ephemeral: true,
+                    });
 
-                        var admin = await client.users.fetch(admin_id).catch(() => null); // fetch admin user by ID, handle error if not found
-                        if (admin) {
-                            const embed = new EmbedBuilder()
-                                .setColor(0xff5555)
-                                .setTitle("📢 Báo cáo sai dữ liệu thời tiết")
-                                .addFields(
-                                    { name: "👤 Người gửi", value: interaction.user.tag, inline: true },
-                                    { name: "🧭 Lệnh", value: command, inline: true },
-                                    { name: "🌍 Truy vấn", value: query, inline: true },
-                                    { name: "📝 Nội dung", value: description }
-                                )
-                                .setTimestamp();
-
-                            const channel = client.channels.cache.get(adminChannelId);
-                            if (channel) channel.send({ embeds: [embed] });
-                        }
-                        console.log(`✅ Báo cáo mới từ ${interaction.user.tag} về ${query}: ${description}`);
+                    // fetch admin user by ID, handle error if not found
+                    if (admin) {
+                        const embed = new EmbedBuilder()
+                            .setColor(0xff5555)
+                            .setTitle("📢 Báo cáo sai dữ liệu thời tiết")
+                            .addFields(
+                                { name: "👤 Người gửi", value: interaction.user.tag, inline: true },
+                                { name: "🧭 Lệnh", value: command, inline: true },
+                                { name: "🌍 Truy vấn", value: query, inline: true },
+                                { name: "📝 Nội dung", value: description }
+                            )
+                            .setTimestamp();
+                        await admin.send({ embeds: [embed] }).catch(() => null); // send DM to admin, handle error if cannot send
                     }
-                );
+                    console.log(`✅ Báo cáo mới từ ${interaction.user.tag} về ${query}: ${description}`);
+                } catch (err) {
+                    console.error("❌ Lỗi lưu report:", err);
+                    await interaction.reply({ content: "⚠️ Có lỗi khi lưu báo cáo!", ephemeral: true });
+                }
             }
         });
     }
