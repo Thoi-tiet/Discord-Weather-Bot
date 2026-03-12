@@ -53,7 +53,7 @@ class WeatherReport {
     }
 
     // ⚙️ Gắn listener xử lý vào client
-    attach(client, admin = null) {
+    attach(client, admin) {
         client.on(Events.InteractionCreate, async (interaction) => {
             // --- Khi người dùng bấm nút ---
             if (interaction.isButton() && interaction.customId.startsWith("report_weather_")) {

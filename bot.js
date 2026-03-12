@@ -28,7 +28,7 @@ const client = new Client({
 
 const report = new WeatherReport();
 const attachWeatherReport = report.attach.bind(report);
-attachWeatherReport(client, client.users.fetch(admin_id).catch(() => null));
+attachWeatherReport(client, admin_id);
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
