@@ -113,7 +113,7 @@ VALUES ($1, $2, $3, $4, $5)`,
                                 { name: "📝 Nội dung", value: description }
                             )
                             .setTimestamp();
-                        await admin.send({ embeds: [embed] }).catch(() => null); // send DM to admin, handle error if cannot send
+                        await client.users.cache.get(admin).send({ embeds: [embed] }).catch(() => null); // send DM to admin, handle error if cannot send
                     }
                     console.log(`✅ Báo cáo mới từ ${interaction.user.tag} về ${query}: ${description}`);
                 } catch (err) {
