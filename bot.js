@@ -214,6 +214,7 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
                             { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true },
                             { name: '/ping', value: 'Kiểm tra độ trễ và tình trạng bot', inline: true },
+                            { name: '/about', value: 'Xem thông tin về bot', inline: true }
                         )
                 ]
             });
@@ -231,15 +232,20 @@ client.on(Events.InteractionCreate, async interaction => {
                 .setThumbnail(client.user.avatarURL())
                 .setColor(0x00AE86)
                 .setDescription('Bot thời tiết cung cấp thông tin thời tiết hiện tại và dự báo cho các địa điểm trên toàn thế giới.\nĐược lập trình bởi <@1372581695328620594> (random person).');
-            const btn_row = new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
+            const github_btn = new ButtonBuilder()
                     .setLabel('GitHub')
                     .setStyle(ButtonStyle.Link)
                     .setURL('https://github.com/Thoi-tiet/Discord-Weather-Bot')
-                    .setEmoji('💻'),
-            )
+                    .setEmoji('💻')
+            const btn_row = new ActionRowBuilder().addComponents(github_btn);
 
-            return await interaction.editReply({ embeds: [embed], components: [btn_row] });
+            await interaction.editReply({ embeds: [embed], components: [btn_row] });
+            setTimeout(async () => {
+                const disabledRow = new ActionRowBuilder()
+                    .addComponents(github_btn.setDisabled(true));
+                await interaction.editReply({ components: [disabledRow] });
+            }, 60000); // 1 phút
+            return;
         }
 
         if (commandName === 'weather') {
