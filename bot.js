@@ -90,7 +90,7 @@ client.on(Events.InteractionCreate, async interaction => {
     const { commandName, options } = interaction;
 
     try {
-        if (commandName !== 'help' && commandName !== 'vote' && commandName !== 'ping' && !interaction.deferred && !interaction.replied) {
+        if (commandName !== 'help' && commandName !== 'vote' && commandName !== 'ping' && commandName !== 'about' && !interaction.deferred && !interaction.replied) {
             await interaction.deferReply({ flags: 64 });
         }
 
@@ -249,6 +249,12 @@ client.on(Events.InteractionCreate, async interaction => {
             }, 60000); // 1 phút
             return;
         }
+
+/**
+ * Main command handling logic. 
+ * Each command will call the corresponding function in functions.js and send the result back to the user.
+ * For weather-related commands, a "Report Issue" button will be included that encodes the command and parameters for easy reporting.
+ */
 
         if (commandName === 'weather') {
             const location = options.getString('location').trim();
