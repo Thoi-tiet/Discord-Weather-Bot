@@ -222,10 +222,12 @@ client.on(Events.InteractionCreate, async interaction => {
 
         if (commandName === 'about') {
             const show = options.getBoolean('show') ?? true;
-            if (show === false) {
-                await interaction.deferReply({ ephemeral: true });
-            } else {
-                await interaction.deferReply();
+            if (!interaction.deferred && !interaction.replied) {
+                if (show === false) {
+                    await interaction.deferReply({ ephemeral: true });
+                } else {
+                    await interaction.deferReply();
+                }
             }
             const embed = new EmbedBuilder()
                 .setTitle('Giới thiệu')
