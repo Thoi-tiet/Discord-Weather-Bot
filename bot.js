@@ -45,8 +45,6 @@ const commands = [
         .addSubcommand(sub => sub.setName("location_to_coords").setDescription("Chuyển từ địa điểm sang tọa độ").addStringOption(option => option.setName("location").setDescription("Nhập tên địa điểm").setRequired(true)))
         .addSubcommand(sub => sub.setName("coords_to_location").setDescription("Chuyển từ tọa độ sang địa điểm").addNumberOption(option => option.setName("lat").setDescription("Nhập vĩ độ").setRequired(true)).addNumberOption(option => option.setName("lon").setDescription("Nhập kinh độ").setRequired(true))),
     new SlashCommandBuilder().setName('donate').setDescription('Ủng hộ để phát triển bot'),
-    new SlashCommandBuilder().setName('weather_icon').setDescription('Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addStringOption(option => option.setName('location').setDescription('Tên địa điểm').setRequired(true)),
-    new SlashCommandBuilder().setName('weather_icon_coord').setDescription('Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName('satellite_radiation').setDescription('Xem dữ liệu bức xạ vệ tinh (satellite radiation)').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName('elevation').setDescription('Xem độ cao so với mực nước biển').setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
     new SlashCommandBuilder().setName("flood").setDescription("Xem nguy cơ ngập lụt (được cập nhật vào mỗi ngày)").setContexts([InteractionContextType.PrivateChannel, InteractionContextType.Guild, InteractionContextType.BotDM]).addNumberOption(option => option.setName('latitude').setDescription('Vĩ độ').setRequired(true)).addNumberOption(option => option.setName('longitude').setDescription('Kinh độ').setRequired(true)),
@@ -202,9 +200,7 @@ client.on(Events.InteractionCreate, async interaction => {
                             { name: '/weather_coord', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
                             { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
                             { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
-                            { name: '/weather_icon', value: 'Xem biểu tượng thời tiết theo địa điểm (ở thời điểm hiện tại)', inline: true },
                             { name: '/satellite_radiation', value: 'Xem dữ liệu bức xạ vệ tinh (satellite radiation)', inline: true },
-                            { name: '/weather_icon_coord', value: 'Xem biểu tượng thời tiết theo tọa độ (ở thời điểm hiện tại)', inline: true },
                             { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                             { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
                             { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
@@ -290,18 +286,6 @@ client.on(Events.InteractionCreate, async interaction => {
             return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
         }
 
-        if (commandName === 'weather_icon') {
-            const location = options.getString('location').trim();
-            const iconResult = await func.getWeatherIcon(location);
-            return await interaction.editReply(iconResult.error ? iconResult.content : { files: [iconResult.iconUrl] });
-        }
-
-        if (commandName === 'weather_icon_coord') {
-            const lat = options.getNumber('latitude');
-            const lon = options.getNumber('longitude');
-            const iconResult = await func.getWeatherIconByCoords(lat, lon);
-            return await interaction.editReply(iconResult.error ? iconResult.content : { files: [iconResult.iconUrl] });
-        }
 
         if (commandName === 'satellite_radiation') {
             const lat = options.getNumber('latitude');

@@ -58,37 +58,6 @@ class WeatherFunctions {
         }
     }
 
-    async getWeatherIcon(location) {
-        console.log(`Đang lấy biểu tượng thời tiết cho ${location}...`);
-        try {
-            const data = await apiKey.fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${key}&units=metric&lang=vi`);
-
-            if (data.cod !== 200) {
-                console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho **${location}**` };
-            }
-            const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-            return { error: false, iconUrl };
-        } catch (err) {
-            console.log(err);
-            return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
-        }
-    }
-
-    async getWeatherIconByCoords(lat, lon) {
-        console.log(`Đang lấy biểu tượng thời tiết cho tọa độ (${lat}, ${lon})...`);
-        try {
-            const data = await apiKey.fetchWithFallback((key) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=vi`);
-
-            if (data.cod !== 200) {
-                console.log(data + " --- " + data.cod); return { error: true, content: `❌ Không tìm thấy dữ liệu thời tiết cho tọa độ (${lat}, ${lon})` };
-            }
-            const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-            return { error: false, iconUrl };
-        } catch (err) {
-            console.log(err);
-            return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
-        }
-    }
 
     async fetchWeatherDataByCoords(lat, lon) {
         console.log(`Đang lấy thông tin thời tiết cho tọa độ (${lat}, ${lon})...`);
