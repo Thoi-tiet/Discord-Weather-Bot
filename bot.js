@@ -79,9 +79,13 @@ client.once('error', err => {
     console.error('Lỗi client:\n', err);
 })
 
-require('./BotCommands/modules/moderation.js').execute(client);
+client.on(Events.MessageCreate, async (msg) => {
+    await require('./BotCommands/modules/moderation.js').execute(msg, client);
+});
 
-require('./BotCommands/guilds/guildCreate.js').guild_create(client);
+client.on(Events.GuildCreate, async (guild) => {
+    await require('./BotCommands/guilds/guildCreate.js').guild_create(guild, client);
+});
 
 // Main part (handling commands)
 client.on(Events.InteractionCreate, async interaction => {
