@@ -25,7 +25,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers
     ]
 });
-require('./BotCommands/bot/help.js');
+const {HelpPages} = require('./BotCommands/bot/help.js');
 const help_pages = new HelpPages();
 const report = new WeatherReport();
 const attachWeatherReport = report.attach.bind(report);
