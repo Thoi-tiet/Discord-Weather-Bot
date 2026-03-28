@@ -80,10 +80,16 @@ client.once('error', err => {
 })
 
 client.on(Events.MessageCreate, async (msg) => {
+    let send_once = false;
+    if (send_once) return;
+    send_once = true;
     await require('./BotCommands/modules/moderation.js').execute(msg, client);
 });
 
 client.on(Events.GuildCreate, async (guild) => {
+    let send_once = false;
+    if (send_once) return;
+    send_once = true;
     await require('./BotCommands/guilds/guildCreate.js').guild_create(guild, client);
 });
 
