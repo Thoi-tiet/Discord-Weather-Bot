@@ -14,7 +14,6 @@ require('./BotCommands/keepalive.js');
 require('./BotCommands/utils/voting.js');
 
 const { WeatherFunctions } = require('./BotCommands/bot/functions.js');
-const { Component } = require('react');
 const func = new WeatherFunctions();
 // var prefix = "w!";
 
