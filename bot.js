@@ -214,6 +214,16 @@ client.on(Events.InteractionCreate, async interaction => {
                 }
                 await i.update({ embeds: [help_pages.help_pages[curr_page]], components: [help_pages.getRow(curr_page)] });
             });
+            collector.on('end', async () => {
+                const disabledRow = new ActionRowBuilder()
+                    .addComponents(
+                        ButtonBuilder.from(help_pages.getRow(curr_page).components[0]).setDisabled(true),
+                        ButtonBuilder.from(help_pages.getRow(curr_page).components[1]).setDisabled(true),
+                        ButtonBuilder.from(help_pages.getRow(curr_page).components[2]).setDisabled(true),
+                        ButtonBuilder.from(help_pages.getRow(curr_page).components[3]).setDisabled(true)
+                    );
+                await interaction.editReply({ components: [disabledRow] });
+            });
         }
 
         if (commandName === 'about') {
