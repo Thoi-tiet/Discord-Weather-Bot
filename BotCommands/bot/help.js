@@ -39,7 +39,7 @@ class HelpPages  {
 
     getRow(page) {
         const prev_btn = new ButtonBuilder().setCustomId('help_prev').setEmoji('◀️').setStyle(ButtonStyle.Primary).setDisabled(page === 0);
-        const next_btn = new ButtonBuilder().setCustomId('help_next').setLabel('Trang sau').setStyle(ButtonStyle.Primary).setDisabled(page === this.help_pages.length - 1);
+        const next_btn = new ButtonBuilder().setCustomId('help_next').setEmoji('▶️').setStyle(ButtonStyle.Primary).setDisabled(page === this.help_pages.length - 1);
         const first_btn = new ButtonBuilder().setCustomId('help_first').setEmoji('⏮️').setStyle(ButtonStyle.Secondary).setDisabled(page === 0);
         const last_btn = new ButtonBuilder().setCustomId('help_last').setEmoji('⏭️').setStyle(ButtonStyle.Secondary).setDisabled(page === this.help_pages.length - 1);
         const row = new ActionRowBuilder()
