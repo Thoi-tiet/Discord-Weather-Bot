@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder, InteractionContextType } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, Events, EmbedBuilder, PermissionsBitField, ButtonStyle, ButtonBuilder, ButtonInteraction, ActionRowBuilder, InteractionContextType, ComponentType } = require('discord.js');
 require('dotenv').config();
 const os = require('os');
 const apiKeys = process.env.OWM_API_KEYS?.split(",").map(k => k.trim()).filter(Boolean) || [];
@@ -14,6 +14,7 @@ require('./BotCommands/keepalive.js');
 require('./BotCommands/utils/voting.js');
 
 const { WeatherFunctions } = require('./BotCommands/bot/functions.js');
+const { Component } = require('react');
 const func = new WeatherFunctions();
 // var prefix = "w!";
 
@@ -25,7 +26,8 @@ const client = new Client({
         GatewayIntentBits.GuildMembers
     ]
 });
-
+require('./BotCommands/bot/help.js');
+const help_pages = new HelpPages();
 const report = new WeatherReport();
 const attachWeatherReport = report.attach.bind(report);
 attachWeatherReport(client, admin_id);
@@ -185,34 +187,33 @@ client.on(Events.InteractionCreate, async interaction => {
 
         if (commandName === 'help') {
             const show = options.getBoolean('show') ?? true;
+            let curr_page = 0;
             if (show === false) {
                 await interaction.deferReply({ ephemeral: true });
             } else {
                 await interaction.deferReply();
             }
-            return await interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Trợ giúp')
-                        .setDescription('Danh sách các lệnh:')
-                        .addFields(
-                            { name: '/weather', value: 'Xem thời tiết hiện tại', inline: true },
-                            { name: '/weather_coord', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
-                            { name: '/forecast', value: 'Xem dự báo thời tiết', inline: true },
-                            { name: '/forecast_coord', value: 'Xem dự báo thời tiết theo tọa độ', inline: true },
-                            { name: '/satellite_radiation', value: 'Xem dữ liệu bức xạ vệ tinh (satellite radiation)', inline: true },
-                            { name: '/air_pollution', value: 'Xem thông tin ô nhiễm không khí', inline: true },
-                            { name: '/geo coords_to_location', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
-                            { name: '/geo location_to_coords', value: 'Chuyển đổi địa điểm thành tọa độ', inline: true },
-                            { name: '/help', value: 'Hiển thị thông tin trợ giúp', inline: true },
-                            { name: '/donate', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
-                            { name: '/elevation', value: 'Xem độ cao so với mực nước biển', inline: true },
-                            { name: '/flood', value: 'Xem nguy cơ ngập lụt', inline: true },
-                            { name: '/vote', value: 'Bỏ phiếu cho bot trên top.gg', inline: true },
-                            { name: '/ping', value: 'Kiểm tra độ trễ và tình trạng bot', inline: true },
-                            { name: '/about', value: 'Xem thông tin về bot', inline: true }
-                        )
-                ]
+
+            const reply = await interaction.editReply({ embeds: [help_pages.help_pages[curr_page]], components: [help_pages.getRow(curr_page)] });
+            const collector = reply.createMessageComponentCollector(
+                {time: 60000, componentType: ComponentType.Button}
+            )
+            collector.on('collect', async i => {
+                if (i.user.id !== interaction.user.id) {
+                    await i.reply({ content: "⚠️ Chỉ người dùng đã yêu cầu mới có thể tương tác với các nút này.", ephemeral: true });
+                    return;
+                }
+                if (i.customId === 'help_prev' && curr_page > 0) {
+                    curr_page--;
+                } else if (i.customId === 'help_next' && curr_page < help_pages.help_pages.length - 1) {
+                    curr_page++;
+                } else if (i.customId === 'help_first' && curr_page !== 0) {
+                    curr_page = 0;
+                }
+                else if (i.customId === 'help_last' && curr_page !== help_pages.help_pages.length - 1) {
+                    curr_page = help_pages.help_pages.length - 1;
+                }
+                await i.update({ embeds: [help_pages.help_pages[curr_page]], components: [help_pages.getRow(curr_page)] });
             });
         }
 
@@ -231,10 +232,10 @@ client.on(Events.InteractionCreate, async interaction => {
                 .setColor(0x00AE86)
                 .setDescription('Bot thời tiết cung cấp thông tin thời tiết hiện tại và dự báo cho các địa điểm trên toàn thế giới.\nĐược lập trình bởi <@1372581695328620594> (random person).');
             const github_btn = new ButtonBuilder()
-                    .setLabel('GitHub')
-                    .setStyle(ButtonStyle.Link)
-                    .setURL('https://github.com/Thoi-tiet/Discord-Weather-Bot')
-                    .setEmoji('💻')
+                .setLabel('GitHub')
+                .setStyle(ButtonStyle.Link)
+                .setURL('https://github.com/Thoi-tiet/Discord-Weather-Bot')
+                .setEmoji('💻')
             const btn_row = new ActionRowBuilder().addComponents(github_btn);
 
             await interaction.editReply({ embeds: [embed], components: [btn_row] });
@@ -246,11 +247,11 @@ client.on(Events.InteractionCreate, async interaction => {
             return;
         }
 
-/**
- * Main command handling logic. 
- * Each command will call the corresponding function in functions.js and send the result back to the user.
- * For weather-related commands, a "Report Issue" button will be included that encodes the command and parameters for easy reporting.
- */
+        /**
+         * Main command handling logic. 
+         * Each command will call the corresponding function in functions.js and send the result back to the user.
+         * For weather-related commands, a "Report Issue" button will be included that encodes the command and parameters for easy reporting.
+         */
 
         if (commandName === 'weather') {
             const location = options.getString('location').trim();
