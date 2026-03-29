@@ -22,7 +22,7 @@ module.exports = {
         Nếu bạn thích bot, bạn có thể ủng hộ mình qua Patreon hoặc BuyMeACoffee để giúp bot phát triển hơn nữa!`)
                 .setFooter({ text: 'Dev by <@1372581695328620594> (@therealnhan)' })
                 .setTimestamp()
-            await owner.send({ embeds: [guildCreate_embed] });
+            // await owner.send({ embeds: [guildCreate_embed] });
             const voteButton = new ButtonBuilder()
                 .setLabel('Vote trên top.gg')
                 .setStyle(ButtonStyle.Link)
