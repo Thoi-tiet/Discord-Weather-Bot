@@ -40,12 +40,6 @@ module.exports = {
                 .setEmoji('☕');
             const row = new ActionRowBuilder()
                 .addComponents(voteButton, donate_btn, buymeacoffee_btn);
-            // nếu đợi lâu quá thì disable nút
-            setTimeout(async () => {
-                const disabledRow = new ActionRowBuilder()
-                    .addComponents(voteButton.setDisabled(true), donate_btn.setDisabled(true), buymeacoffee_btn.setDisabled(true));
-                owner.edit({ embeds: [guildCreate_embed], components: [disabledRow] });
-            }, 60000); // 1 phút
             owner.send({ embeds: [guildCreate_embed], components: [row] });
         } catch (error) {
             console.error(`Không thể gửi tin nhắn cho chủ server: ${error}`);

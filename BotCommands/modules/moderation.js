@@ -1,3 +1,5 @@
+// Bot moderation cho main server của mình, chỉ áp dụng cho các server được liệt kê trong OWNER_SERVERS
+
 const {
     Client,
     Events,

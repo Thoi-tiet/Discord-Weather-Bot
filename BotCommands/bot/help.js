@@ -7,7 +7,7 @@ class HelpPages  {
         this.help_pages = [
             new EmbedBuilder()
                 .setTitle('Trợ giúp')
-                .setDescription(`Trang 1/3`)
+                .setDescription(`Trang 1/4`)
                 .addFields(
                     { name: '`/weather`', value: 'Xem thời tiết hiện tại', inline: true },
                     { name: '`/weather_coord`', value: 'Xem thời tiết hiện tại theo tọa độ', inline: true },
@@ -18,7 +18,7 @@ class HelpPages  {
                 ),
             new EmbedBuilder()
                 .setTitle('Trợ giúp')
-                .setDescription(`Trang 2/3`)
+                .setDescription(`Trang 2/4`)
                 .addFields(
                     { name: '`/air_pollution`', value: 'Xem thông tin ô nhiễm không khí', inline: true },
                     { name: '`/geo coords_to_location`', value: 'Chuyển đổi tọa độ thành địa điểm', inline: true },
@@ -27,13 +27,16 @@ class HelpPages  {
                     { name: '`/donate`', value: 'Ủng hộ bot nếu bạn thấy hữu ích', inline: true },
 
                 ),
-            new EmbedBuilder().setTitle('Trợ giúp').setDescription(`Trang 3/3`).addFields(
+            new EmbedBuilder().setTitle('Trợ giúp').setDescription(`Trang 3/4`).addFields(
                 { name: '`/elevation`', value: 'Xem độ cao so với mực nước biển', inline: true },
                 { name: '`/flood`', value: 'Xem nguy cơ ngập lụt', inline: true },
                 { name: '`/vote`', value: 'Bỏ phiếu cho bot trên top.gg', inline: true },
                 { name: '`/ping`', value: 'Kiểm tra độ trễ và tình trạng bot', inline: true },
                 { name: '`/about`', value: 'Xem thông tin về bot', inline: true }
-            )
+            ),
+            new EmbedBuilder().setTitle('Trợ giúp').setDescription(`Trang 4/4`).addFields(
+                { name: '`/feedback`', value: 'Gửi phản hồi hoặc báo lỗi cho bot', inline: true },
+            ),
         ];
     }
 

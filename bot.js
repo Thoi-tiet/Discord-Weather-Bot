@@ -26,8 +26,13 @@ const client = new Client({
     ]
 });
 const {HelpPages} = require('./BotCommands/bot/help.js');
+const { Feedback } = require('./BotCommands/modules/feedback.js');
 const help_pages = new HelpPages();
 const report = new WeatherReport();
+const feedback = new Feedback()
+
+
+
 const attachWeatherReport = report.attach.bind(report);
 attachWeatherReport(client, admin_id);
 
@@ -57,7 +62,11 @@ const commands = [
     new SlashCommandBuilder()
         .setName("about")
         .setDescription("Xem thông tin về bot")
-        .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false))
+        .addBooleanOption(option => option.setName("show").setDescription("Hiển thị công khai trong kênh hay ẩn danh (mặc định: công khai)").setRequired(false)),
+    new SlashCommandBuilder()
+        .setName("feedback")
+        .setDescription("Gửi phản hồi hoặc báo lỗi cho bot")
+        .addStringOption(option => option.setName("message").setDescription("Nội dung phản hồi hoặc lỗi").setRequired(true))
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -99,8 +108,22 @@ client.on(Events.InteractionCreate, async interaction => {
     const { commandName, options } = interaction;
 
     try {
-        if (commandName !== 'help' && commandName !== 'vote' && commandName !== 'ping' && commandName !== 'about' && !interaction.deferred && !interaction.replied) {
+        if (commandName !== 'help' && commandName !== 'vote' && commandName !== 'ping' && commandName !== 'about' && commandName !== 'feedback' && !interaction.deferred && !interaction.replied) {
             await interaction.deferReply({ flags: 64 });
+        }
+
+        if (commandName === "feedback") {
+            await interaction.deferReply({ ephemeral: true });
+            const message = options.getString("message");
+            const feedbackEmbed = new EmbedBuilder()
+                .setTitle("📩 Phản hồi mới")
+                .setDescription("Từ: **<@"+interaction.user.id+">** (**"+interaction.user.tag+"**)\n"+message)
+                .setFooter({ text: `Gửi bởi ${interaction.user.tag}` })
+                .setTimestamp();
+            await feedback.feedback(interaction);
+            const adminUser = client.users.cache.get(admin_id);
+            await adminUser.send({ embeds: [feedbackEmbed] });
+            await interaction.editReply("✅ Cảm ơn **" + interaction.user.tag + "** đã gửi phản hồi! Mình sẽ xem xét và cải thiện bot ngày càng tốt hơn.");
         }
 
         if (commandName === "ping") {
