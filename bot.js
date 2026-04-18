@@ -278,12 +278,33 @@ client.on(Events.InteractionCreate, async interaction => {
                 .setStyle(ButtonStyle.Link)
                 .setURL('https://github.com/Thoi-tiet/Discord-Weather-Bot')
                 .setEmoji('💻')
-            const btn_row = new ActionRowBuilder().addComponents(github_btn);
+                        const voteButton = new ButtonBuilder()
+                .setLabel('Vote trên top.gg')
+                .setStyle(ButtonStyle.Link)
+                .setURL(`https://top.gg/bot/${topgg_botid}/vote`)
+                .setEmoji('⭐');
+            const donate_btn = new ButtonBuilder()
+                .setLabel('Ủng hộ qua Patreon')
+                .setStyle(ButtonStyle.Link)
+                .setURL(`https://www.patreon.com/${patreon_id}`)
+                .setEmoji('💖');
+            const buymeacoffee_btn = new ButtonBuilder()
+                .setLabel('Mời mình một ly cà phê')
+                .setStyle(ButtonStyle.Link)
+                .setURL(`https://www.buymeacoffee.com/${buymeacoffee_id}`)
+                .setEmoji('☕');
+
+            const btn_row = new ActionRowBuilder().addComponents(github_btn,voteButton,donate_btn,buymeacoffee_btn);
 
             await interaction.editReply({ embeds: [embed], components: [btn_row] });
             setTimeout(async () => {
                 const disabledRow = new ActionRowBuilder()
-                    .addComponents(github_btn.setDisabled(true));
+                    .addComponents(
+                        github_btn.setDisabled(true),
+                        voteButton.setDisabled(true),
+                        donate_btn.setDisabled(true),
+                        buymeacoffee_btn.setDisabled(true)
+                    );
                 await interaction.editReply({ components: [disabledRow] });
             }, 60000); // 1 phút
             return;
