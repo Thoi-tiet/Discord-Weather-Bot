@@ -45,7 +45,7 @@ class Feedback {
         // save into  database
         // Implementation for saving feedback
         const user_id = interaction.user.id;
-        const message = interaction.options.getString("message");
+        const message = interaction.options.getString("message") + "\nCommand: " + interaction.options.getString("command");
 
         await db.query("INSERT INTO feedback (user_id, message) VALUES ($1, $2)", [user_id, message])
             .then(() => {

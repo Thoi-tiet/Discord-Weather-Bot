@@ -67,6 +67,24 @@ const commands = [
         .setName("feedback")
         .setDescription("Gửi phản hồi hoặc báo lỗi cho bot")
         .addStringOption(option => option.setName("message").setDescription("Nội dung phản hồi hoặc lỗi").setRequired(true))
+        .addStringOption(option => option.setName("command").setDescription("Lệnh liên quan").setChoices(
+            { name: 'weather', value: 'weather' },
+            { name: 'weather_coord', value: 'weather_coord' },
+            { name: 'forecast', value: 'forecast' },
+            { name: 'forecast_coord', value: 'forecast_coord' },
+            { name: 'air_pollution', value: 'air_pollution' },
+            { name: 'geo location_to_coords', value: 'geo location_to_coords' },
+            { name: 'geo coords_to_location', value: 'geo coords_to_location' },
+            { name: 'donate', value: 'donate' },
+            { name: 'satellite_radiation', value: 'satellite_radiation' },
+            { name: 'elevation', value: 'elevation' },
+            { name: 'flood', value: 'flood' },
+            { name: 'ping', value: 'ping' },
+            { name: 'about', value: 'about' },
+            { name: 'help', value: 'help' },
+            { name: 'vote', value: 'vote' },
+            { name: 'Không liên quan đến lệnh nào', value: 'none' }
+        ).setRequired(true))
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -117,7 +135,9 @@ client.on(Events.InteractionCreate, async interaction => {
             const message = options.getString("message");
             const feedbackEmbed = new EmbedBuilder()
                 .setTitle("📩 Phản hồi mới")
-                .setDescription("Từ: **<@"+interaction.user.id+">** (**"+interaction.user.tag+"**)\n"+message)
+                .setDescription("Từ: **<@"+interaction.user.id+">** (**"+interaction.user.tag+"**)\n"+message+"\n**Lệnh: "+
+                    (options.getString("command") != 'none' ? options.getString("command"): "Không có lệnh liên quan")
+                    +"**")
                 .setFooter({ text: `Gửi bởi ${interaction.user.tag}` })
                 .setTimestamp();
             await feedback.feedback(interaction);
