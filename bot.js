@@ -120,6 +120,59 @@ client.on(Events.GuildCreate, async (guild) => {
     await require('./BotCommands/guilds/guildCreate.js').guild_create(guild, client);
 });
 
+async function sendForecastPages(interaction, fetchPage, initialResult) {
+    if (initialResult.error) {
+        return interaction.editReply(initialResult.content);
+    }
+
+    let currentPage = 0;
+    const createRow = () => new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('forecast_hourly')
+            .setLabel('Dự báo theo giờ')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(currentPage === 0),
+        new ButtonBuilder()
+            .setCustomId('forecast_daily')
+            .setLabel('Dự báo 7 ngày')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(currentPage === 1)
+    );
+
+    const reply = await interaction.editReply({ embeds: [initialResult.embed], components: [createRow()] });
+    const collector = reply.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 120000
+    });
+
+    collector.on('collect', async buttonInteraction => {
+        if (buttonInteraction.user.id !== interaction.user.id) {
+            await buttonInteraction.reply({
+                content: '⚠️ Chỉ người dùng đã yêu cầu mới có thể tương tác với các nút này.',
+                ephemeral: true
+            });
+            return;
+        }
+
+        const nextPage = buttonInteraction.customId === 'forecast_daily' ? 1 : 0;
+        const result = await fetchPage(nextPage);
+        if (result.error) {
+            await buttonInteraction.update({ content: result.content, embeds: [], components: [createRow()] });
+            return;
+        }
+
+        currentPage = nextPage;
+        await buttonInteraction.update({ embeds: [result.embed], components: [createRow()] });
+    });
+
+    collector.on('end', async () => {
+        const disabledRow = new ActionRowBuilder().addComponents(
+            ...createRow().components.map(component => ButtonBuilder.from(component).setDisabled(true))
+        );
+        await interaction.editReply({ components: [disabledRow] }).catch(() => {});
+    });
+}
+
 // Main part (handling commands)
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isCommand()) return;
@@ -353,23 +406,20 @@ client.on(Events.InteractionCreate, async interaction => {
 
         if (commandName === 'forecast') {
             const location = options.getString('location').trim();
-            let hours = options.getInteger('hours') ?? 3;
+            const hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
-            const result = await func.fetchForecast(location, hours);
-            // const row = report.createReportButton(commandName, encodeURIComponent(location));
-            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+            const initialResult = await func.fetchForecast(location, hours, 0);
+            return await sendForecastPages(interaction, page => func.fetchForecast(location, hours, page), initialResult);
         }
 
         if (commandName === 'forecast_coord') {
             const lat = options.getNumber('latitude');
             const lon = options.getNumber('longitude');
-            let hours = options.getInteger('hours') ?? 3;
+            const hours = options.getInteger('hours') ?? 3;
             if (hours <= 0 || hours > 120) return await interaction.editReply('⚠ Vui lòng chọn số giờ từ 1 đến 120.');
-            const result = await func.fetchForecastByCoords(lat, lon, hours);
-            // const row = report.createReportButton(commandName, `${lat},${lon}`);
-            return await interaction.editReply(result.error ? result.content : { embeds: [result.embed] });
+            const initialResult = await func.fetchForecastByCoords(lat, lon, hours, 0);
+            return await sendForecastPages(interaction, page => func.fetchForecastByCoords(lat, lon, hours, page), initialResult);
         }
-
 
         if (commandName === 'satellite_radiation') {
             const lat = options.getNumber('latitude');
@@ -378,8 +428,6 @@ client.on(Events.InteractionCreate, async interaction => {
             const row = report.createReportButton(commandName, `${lat},${lon}`);
             return await interaction.editReply(res.error ? res.content : { embeds: [res.embed], components: [row] });
         }
-
-
 
         if (commandName === 'donate') {
             const donate_btn = new ButtonBuilder().setLabel('Ủng hộ qua Patreon').setStyle(ButtonStyle.Link).setURL(`https://www.patreon.com/${patreon_id}`).setEmoji('💖');

@@ -106,31 +106,63 @@ class WeatherEmbed {
 
 
 
-    buildForecastEmbed(data, hours, title) {
-        const now = Date.now();
-        const selected = data.list.filter(item => {
-            const diffHours = (new Date(item.dt * 1000) - now) / (1000 * 60 * 60);
-            return diffHours > 0 && diffHours <= hours;
-        });
-        if (selected.length === 0) {
-            return new EmbedBuilder().setDescription(`⚠ Không có dữ liệu dự báo trong ${hours} giờ tới.`);
+    async buildForecastEmbed(data, hours, title, page=0, dailyData) {
+        if (page === 0) {
+            const now = Date.now();
+            const selected = data.list.filter(item => {
+                const diffHours = (new Date(item.dt * 1000) - now) / (1000 * 60 * 60);
+                return diffHours > 0 && diffHours <= hours;
+            });
+            let desc = '';
+            selected.forEach(item => {
+                const time = new Date(item.dt * 1000).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+                desc += `**${time} (GMT+0)** - ${item.weather[0].description}, 🌡 ${item.main.temp}°C, 💧 ${item.main.humidity}%, 👁 ${(item.visibility / 1000).toFixed(1)} km, 💨 ${item.wind.speed} m/s\n\n`;
+            });
+
+            const embed = new EmbedBuilder()
+                .setTitle(`📅 Dự báo ${hours} giờ tới ở ${title}`)
+                .setColor(0x3498db)
+                .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
+                .setTimestamp();
+            if (selected.length > 0) {
+                embed.setThumbnail(`https://openweathermap.org/img/wn/${selected[0].weather[0].icon}@2x.png`);
+                embed.setDescription(desc);
+            } else {
+                embed.setDescription(`⚠ Không có dữ liệu dự báo trong ${hours} giờ tới.`);
+            }
+            return embed;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(`📅 Dự báo ${hours} giờ tới ở ${title}`)
-            .setColor(0x3498db)
-            .setThumbnail(`https://openweathermap.org/img/wn/${selected[0].weather[0].icon}@2x.png`)
-            .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
-            .setTimestamp();
+        if (page === 1) {
+            if (!dailyData?.daily?.time?.length) {
+                return new EmbedBuilder()
+                    .setTitle(`📅 Dự báo trong 7 ngày tới ở ${title}`)
+                    .setDescription('⚠ Không có dữ liệu dự báo 7 ngày.')
+                    .setColor(0x3498db);
+            }
+            const embed = new EmbedBuilder()
+                .setTitle(`📅 Dự báo trong 7 ngày tới ở ${title}`)
+                .setColor(0x3498db)
+                .setFooter({ text: 'Dữ liệu có thể không chính xác!' })
+                .setTimestamp();
+            dailyData.daily.time.forEach((time, index) => {
+                const date = new Date(time);
+                const dateString = date.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+                const max_temp = dailyData.daily.temperature_2m_max[index];
+                const min_temp = dailyData.daily.temperature_2m_min[index];
+                const sunrise = dailyData.daily.sunrise[index];
+                const sunset = dailyData.daily.sunset[index];
+                const uv_index = dailyData.daily.uv_index_max[index];
+                const wind_speed = dailyData.daily.wind_speed_10m_max[index];
 
-        let desc = '';
-        selected.forEach(item => {
-            const time = new Date(item.dt * 1000).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-            desc += `**${time} (GMT+0)** - ${item.weather[0].description}, 🌡 ${item.main.temp}°C, 💧 ${item.main.humidity}%, 👁 ${(item.visibility / 1000).toFixed(1)} km, 💨 ${item.wind.speed} m/s\n\n`;
-        });
+                embed.addFields(
+                    { name: `${dateString}`, value: `🌡 Nhiệt độ: ${min_temp}°C - ${max_temp}°C\n🌅 Bình minh: ${sunrise}\n🌇 Hoàng hôn: ${sunset}\n☀️ UV Index: ${uv_index}\n💨 Gió: ${wind_speed} m/s`, inline: false }
+                );
+            });
+            return embed;
+        }
 
-        embed.setDescription(desc);
-        return embed;
+        return new EmbedBuilder().setDescription('⚠ Trang dự báo không hợp lệ.');
     }
 }
 
