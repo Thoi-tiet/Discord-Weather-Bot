@@ -144,6 +144,7 @@ async function sendForecastPages(interaction, fetchPage, initialResult) {
         componentType: ComponentType.Button,
         time: 120000
     });
+    let isLoading = false;
 
     collector.on('collect', async buttonInteraction => {
         if (buttonInteraction.user.id !== interaction.user.id) {
@@ -154,15 +155,35 @@ async function sendForecastPages(interaction, fetchPage, initialResult) {
             return;
         }
 
-        const nextPage = buttonInteraction.customId === 'forecast_daily' ? 1 : 0;
-        const result = await fetchPage(nextPage);
-        if (result.error) {
-            await buttonInteraction.update({ content: result.content, embeds: [], components: [createRow()] });
+        if (isLoading) {
+            await buttonInteraction.reply({
+                content: '⏳ Đang tải dự báo, vui lòng đợi một chút.',
+                ephemeral: true
+            });
             return;
         }
 
-        currentPage = nextPage;
-        await buttonInteraction.update({ embeds: [result.embed], components: [createRow()] });
+        const nextPage = buttonInteraction.customId === 'forecast_daily' ? 1 : 0;
+        isLoading = true;
+        try {
+            await buttonInteraction.deferUpdate();
+            const result = await fetchPage(nextPage);
+            if (result.error) {
+                await buttonInteraction.followUp({ content: result.content, ephemeral: true });
+                return;
+            }
+
+            currentPage = nextPage;
+            await interaction.editReply({ embeds: [result.embed], components: [createRow()] });
+        } catch (err) {
+            console.error('Lỗi khi chuyển trang dự báo:', err);
+            await buttonInteraction.followUp({
+                content: '⚠ Không thể tải trang dự báo này. Vui lòng thử lại.',
+                ephemeral: true
+            }).catch(() => {});
+        } finally {
+            isLoading = false;
+        }
     });
 
     collector.on('end', async () => {
