@@ -13,26 +13,68 @@ const {
 } = require('./build_embed.js');
 
 const embed = new WeatherEmbed();
+const dailyForecastCache = new Map();
+const pendingDailyForecasts = new Map();
+let dailyForecastCooldownUntil = 0;
 
 async function fetchDailyForecast(lat, lon) {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,wind_speed_10m_max&forecast_days=7&wind_speed_unit=ms&timezone=Asia%2FBangkok`;
-    const response = await fetch(url);
-    let data;
+    const now = Date.now();
+    if (now < dailyForecastCooldownUntil) {
+        const error = new Error('Open-Meteo daily request quota is exhausted; retry tomorrow');
+        error.code = 'DAILY_FORECAST_QUOTA';
+        throw error;
+    }
+
+    const cacheKey = `${Number(lat).toFixed(2)},${Number(lon).toFixed(2)}`;
+    const cachedForecast = dailyForecastCache.get(cacheKey);
+    if (cachedForecast && cachedForecast.expiresAt > now) {
+        return cachedForecast.data;
+    }
+
+    if (pendingDailyForecasts.has(cacheKey)) {
+        return pendingDailyForecasts.get(cacheKey);
+    }
+
+    const request = (async () => {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,wind_speed_10m_max&forecast_days=7&wind_speed_unit=ms&timezone=Asia%2FBangkok`;
+        const response = await fetch(url);
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error(`Open-Meteo returned HTTP ${response.status} with an invalid response body`);
+        }
+
+        if (!response.ok || data.error) {
+            const reason = data.reason || data.message || `HTTP ${response.status}`;
+            const error = new Error(`Open-Meteo returned HTTP ${response.status}: ${reason}`);
+            if (response.status === 429) {
+                dailyForecastCooldownUntil = Date.now() + 24 * 60 * 60 * 1000;
+                error.code = 'DAILY_FORECAST_QUOTA';
+            }
+            throw error;
+        }
+        if (!data.daily?.time?.length) {
+            throw new Error('Open-Meteo returned no daily forecast data');
+        }
+
+        dailyForecastCache.set(cacheKey, { data, expiresAt: Date.now() + 6 * 60 * 60 * 1000 });
+        return data;
+    })();
+
+    pendingDailyForecasts.set(cacheKey, request);
     try {
-        data = await response.json();
-    } catch {
-        throw new Error(`Open-Meteo returned HTTP ${response.status} with an invalid response body`);
+        return await request;
+    } finally {
+        pendingDailyForecasts.delete(cacheKey);
     }
+}
 
-    if (!response.ok || data.error) {
-        const reason = data.reason || data.message || `HTTP ${response.status}`;
-        throw new Error(`Open-Meteo returned HTTP ${response.status}: ${reason}`);
+function dailyForecastErrorMessage(err) {
+    if (err.code === 'DAILY_FORECAST_QUOTA') {
+        return '⚠ Hạn mức dự báo 7 ngày của Open-Meteo đã hết. Vui lòng thử lại vào ngày mai; dự báo theo giờ vẫn khả dụng.';
     }
-    if (!data.daily?.time?.length) {
-        throw new Error('Open-Meteo returned no daily forecast data');
-    }
-
-    return data;
+    return '⚠ Không thể tải dự báo 7 ngày từ Open-Meteo. Vui lòng thử lại sau.';
 }
 
 class WeatherFunctions {
@@ -120,7 +162,7 @@ class WeatherFunctions {
                     dailyData = await fetchDailyForecast(lat, lon);
                 } catch (err) {
                     console.error('Open-Meteo daily forecast failed:', err);
-                    return { error: true, content: '⚠ Không thể tải dự báo 7 ngày từ Open-Meteo. Vui lòng thử lại sau.' };
+                    return { error: true, content: dailyForecastErrorMessage(err) };
                 }
             }
             return { error: false, embed: await embed.buildForecastEmbed(data, hours, `(${lat}, ${lon}) - ${data.city.name}, ${data.city.country}`, page, dailyData) };
@@ -149,7 +191,7 @@ class WeatherFunctions {
                     dailyData = await fetchDailyForecast(place.lat, place.lon);
                 } catch (err) {
                     console.error('Open-Meteo daily forecast failed:', err);
-                    return { error: true, content: '⚠ Không thể tải dự báo 7 ngày từ Open-Meteo. Vui lòng thử lại sau.' };
+                    return { error: true, content: dailyForecastErrorMessage(err) };
                 }
             }
             return { error: false, embed: await embed.buildForecastEmbed(data, hours, `${data.city.name}, ${data.city.country}`, page, dailyData) };
