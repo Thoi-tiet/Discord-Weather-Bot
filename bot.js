@@ -129,12 +129,12 @@ async function sendForecastPages(interaction, fetchPage, initialResult) {
     const createRow = () => new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId('forecast_hourly')
-            .setLabel('Dự báo theo giờ')
+            .setLabel('🕒 Dự báo theo giờ')
             .setStyle(ButtonStyle.Primary)
             .setDisabled(currentPage === 0),
         new ButtonBuilder()
             .setCustomId('forecast_daily')
-            .setLabel('Dự báo 7 ngày')
+            .setLabel('📅 Dự báo 7 ngày')
             .setStyle(ButtonStyle.Primary)
             .setDisabled(currentPage === 1)
     );

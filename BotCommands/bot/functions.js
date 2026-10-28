@@ -14,6 +14,27 @@ const {
 
 const embed = new WeatherEmbed();
 
+async function fetchDailyForecast(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,wind_speed_10m_max&forecast_days=7&wind_speed_unit=ms&timezone=Asia%2FBangkok`;
+    const response = await fetch(url);
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        throw new Error(`Open-Meteo returned HTTP ${response.status} with an invalid response body`);
+    }
+
+    if (!response.ok || data.error) {
+        const reason = data.reason || data.message || `HTTP ${response.status}`;
+        throw new Error(`Open-Meteo returned HTTP ${response.status}: ${reason}`);
+    }
+    if (!data.daily?.time?.length) {
+        throw new Error('Open-Meteo returned no daily forecast data');
+    }
+
+    return data;
+}
+
 class WeatherFunctions {
     constructor() { }
 
@@ -95,13 +116,16 @@ class WeatherFunctions {
             if (data.cod !== "200") return { error: true, content: `❌ Không tìm thấy dự báo cho tọa độ (${lat}, ${lon})` };
             let dailyData;
             if (page === 1) {
-                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,wind_speed_10m_max&timezone=Asia%2FBangkok`);
-                dailyData = await response.json();
-                if (!response.ok || dailyData.error) throw new Error('Open-Meteo daily forecast request failed');
+                try {
+                    dailyData = await fetchDailyForecast(lat, lon);
+                } catch (err) {
+                    console.error('Open-Meteo daily forecast failed:', err);
+                    return { error: true, content: '⚠ Không thể tải dự báo 7 ngày từ Open-Meteo. Vui lòng thử lại sau.' };
+                }
             }
             return { error: false, embed: await embed.buildForecastEmbed(data, hours, `(${lat}, ${lon}) - ${data.city.name}, ${data.city.country}`, page, dailyData) };
         } catch (err) {
-            console.log(err);
+            console.error('Lỗi khi lấy dự báo theo tọa độ:', err);
             return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
         }
     }
@@ -121,13 +145,16 @@ class WeatherFunctions {
                     return { error: true, content: `❌ Không tìm thấy tọa độ cho **${location}**` };
                 }
 
-                const dailyResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,wind_speed_10m_max&timezone=Asia%2FBangkok`);
-                dailyData = await dailyResponse.json();
-                if (!dailyResponse.ok || dailyData.error) throw new Error('Open-Meteo daily forecast request failed');
+                try {
+                    dailyData = await fetchDailyForecast(place.lat, place.lon);
+                } catch (err) {
+                    console.error('Open-Meteo daily forecast failed:', err);
+                    return { error: true, content: '⚠ Không thể tải dự báo 7 ngày từ Open-Meteo. Vui lòng thử lại sau.' };
+                }
             }
             return { error: false, embed: await embed.buildForecastEmbed(data, hours, `${data.city.name}, ${data.city.country}`, page, dailyData) };
         } catch (err) {
-            console.log(err);
+            console.error('Lỗi khi lấy dự báo theo tên địa điểm:', err);
             return { error: true, content: '⚠ Lỗi khi kết nối OpenWeatherMap.' };
         }
     }
